@@ -1,0 +1,28 @@
+Tabela Visits
+car: viatura utilizada
+latitude: latitude coletada no momento da visita
+longitude: longitude coletada no momento da visita
+date: data da visita
+
+Tabela Properties
+
+code: código da propriedade
+has_geo_board: propriedade possui placa de georreferenciamento?
+qty_people: quantidade de pessoas que residem na propriedade
+has_cams: há câmeras na residência?
+has_phone_signal: Funciona sinal telefônico?
+has_internet: Possui acesso à internet?
+qty_agricultural_defensives: Mantém defensivo agrícola na propriedade? Quantidade. Caso não tenha, guarda 0 (zero)
+has_gun: Mantém arma de fogo na residência?
+has_gun_local: Caso (has_gun) Possui local adequado para armazenamento da arma de fogo?
+gun_local_description: Caso (has_gun_local) Descrição do local onde a arma é armazenada
+observations: Histórico ou anotações, observações
+
+Tabela Property Owners
+
+name: Nome do Proprietário
+__pending__: informações adicionais
+
+Tabela Property Type
+
+name: Tipo da propriedade (chácara, sítio, casa de campo e residência)

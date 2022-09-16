@@ -13,11 +13,32 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::all();
+        $query = User::query();
 
-        return response()->json($users);
+        // Implements search by name and email
+        if ($search = $request->input('search')) {
+            $query->where('name', 'regexp', "/.*$search/i")
+            ->orWhere('email', 'regexp', "/.*$search/i");
+        }
+
+        // Implements order by name
+        $query->orderBy('name', $request->input('sort', 'asc'));
+
+        // Implements mongodb pagination
+        $elementsPerPage = 50;
+        $page = $request->input('page', 1);
+        $total = $query->count();
+
+        $result = $query->offset(($page - 1) * $elementsPerPage)->limit($elementsPerPage)->get();
+
+        return [
+            'users' => $result,
+            'total' => $total,
+            'page' => $page,
+            'last_page' => ceil($total / $elementsPerPage),
+        ];
     }
 
     /**
