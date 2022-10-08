@@ -18,7 +18,13 @@ class UserFactory extends Factory
     public function definition()
     {
         $original_password = $this->faker->password;
-        $password = Hash::make($original_password);
+        $password = Hash::make(
+            $original_password,
+            [
+                'rounds' => 10,
+                'salt' => env('SALT'),
+            ],
+        );
 
         return [
             'name' => $this->faker->name(),
