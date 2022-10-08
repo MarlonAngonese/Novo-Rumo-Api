@@ -27,7 +27,7 @@ class UserController extends Controller
         $query->orderBy('name', $request->input('sort', 'asc'));
 
         // Implements mongodb pagination
-        $elementsPerPage = 50;
+        $elementsPerPage = 200;
         $page = $request->input('page', 1);
         $total = $query->count();
 
