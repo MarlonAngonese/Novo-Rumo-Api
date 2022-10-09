@@ -17,7 +17,7 @@ class SyncController extends Controller {
 
         // Check for last_date request param
         if (isset($request["last_date"])) {
-            $last_date = date('Y-m-d h:i:s', strtotime("+3 hours", strtotime($request["last_date"])));
+            $last_date = date('Y-m-d H:i:s', strtotime("+3 hours", strtotime($request["last_date"])));
             $query = User::query()->where('updated_at', '>', new DateTime($last_date));
 
             return $query->get();
