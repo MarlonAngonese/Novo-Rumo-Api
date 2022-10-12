@@ -19,9 +19,9 @@ class SyncController extends Controller {
 
         try {
             if ($request->method() == "POST") {
+                $users = $request->json();
 
-                var_dump($request->json());
-                die();
+                return response()->json($users);
             }
     
             // Check for last_date request param
