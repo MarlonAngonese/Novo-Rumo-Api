@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Garbage;
 use App\Models\User;
 use DateTime;
 use Illuminate\Http\Request;
@@ -18,9 +19,14 @@ class SyncController extends Controller {
         // Check for last_date request param
         if (isset($request["last_date"])) {
             $last_date = date('Y-m-d H:i:s', strtotime($request["last_date"]));
-            $query = User::query()->where('updated_at', '>', new DateTime($last_date));
+            $userQuery = User::query()->where('updated_at', '>', new DateTime($last_date));
 
-            return $query->get();
+            $deletedQuery = Garbage::query()->where('table', '=', 'users')->where('updated_at', '>', new DateTime($last_date));
+            
+            return [
+                'users' => $userQuery->get(),
+                'deleted' => $deletedQuery->get(),
+            ];
         }
 
         // If there isn't any last_date param, return all data
