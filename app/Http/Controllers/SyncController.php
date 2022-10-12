@@ -19,9 +19,25 @@ class SyncController extends Controller {
 
         try {
             if ($request->method() == "POST") {
-                $users = $request->json();
+                
+                $users = json_decode($request->getContent(), true);
 
-                return response()->json($users);
+                foreach ($users as $user) {
+                    User::insert(
+                        [
+                            "_id" => $user["_id"],
+                            "name" => $user["name"],
+                            "email" => $user["email"],
+                            "password" => $user["password"],
+                            "created_at" => $user["createdAt"],
+                            "updated_at" => $user["updatedAt"],
+                        ],
+                    );
+                }
+
+                return response()->json([
+                    'updated' => true,
+                ]);
             }
     
             // Check for last_date request param
