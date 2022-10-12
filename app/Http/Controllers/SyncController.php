@@ -23,14 +23,16 @@ class SyncController extends Controller {
                 $users = json_decode($request->getContent(), true);
 
                 foreach ($users as $user) {
-                    User::insert(
+                    require_once("./vendor/mongodb/mongodb");
+
+                    User::insertOrIgnore(
                         [
-                            "_id" => $user["_id"],
+                            "_id" => new \MongoDB\BSON\ObjectId($user["_id"]),
                             "name" => $user["name"],
                             "email" => $user["email"],
                             "password" => $user["password"],
-                            "created_at" => $user["createdAt"],
-                            "updated_at" => $user["updatedAt"],
+                            "created_at" => new Date($user["createdAt"]),
+                            "updated_at" => new Date($user["updatedAt"]),
                         ],
                     );
                 }
