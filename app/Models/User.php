@@ -11,6 +11,7 @@ class User extends Authenticatable implements JWTSubject
     use HasFactory;
 
     protected $dates = ['created_at', 'updated_at'];
+    public $timestamps = true;
 
     public function getJWTIdentifier()
     {

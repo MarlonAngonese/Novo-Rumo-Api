@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Garbage;
 use App\Models\User;
+use Carbon\Carbon;
 use DateTime;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
+use MongoDB\BSON\ObjectId;
 
 class SyncController extends Controller {
     /**
@@ -20,26 +22,37 @@ class SyncController extends Controller {
         try {
             if ($request->method() == "POST") {
                 
-                $users = json_decode($request->getContent(), true);
+                $json = json_decode($request->getContent(), true);
+                $users = $json['users'];
+                $usersDeleted = $json['deleted'];
 
                 foreach ($users as $user) {
-                    require_once("./vendor/mongodb/mongodb");
+                    $existingUser = User::find($user["_id"]);
 
-                    User::insertOrIgnore(
-                        [
-                            "_id" => new \MongoDB\BSON\ObjectId($user["_id"]),
-                            "name" => $user["name"],
-                            "email" => $user["email"],
-                            "password" => $user["password"],
-                            "created_at" => new Date($user["createdAt"]),
-                            "updated_at" => new Date($user["updatedAt"]),
-                        ],
-                    );
+                    if (!$existingUser) { // New User
+                        $userData = new User;
+                    } else { // User exists
+                        $userData = $existingUser;
+                    }
+                    
+                    $userData->_id = new ObjectId($user["_id"]);
+                    $userData->name = $user["name"];
+                    $userData->email = $user["email"];
+                    $userData->password = $user["password"];
+                    $userData->created_at = new Carbon($user["createdAt"]);
+                    $userData->updated_at = new Carbon($user["updatedAt"]);
+
+                    $userData->save();
+                }
+
+                foreach ($usersDeleted as $uD) {
+                    $userDeleted = User::find($uD);
+                    $userDeleted->delete();
                 }
 
                 return response()->json([
                     'updated' => true,
-                ]);
+                ], 201);
             }
     
             // Check for last_date request param
@@ -59,7 +72,7 @@ class SyncController extends Controller {
             // If there isn't any last_date param, return all data
             return response()->json(User::query()->get());
         } catch (Exception $e) {
-            return response()->json([ 'error' => $e ], 500);
+            return response()->json([ 'error' => strval($e) ], 500);
         }
     }
 }
