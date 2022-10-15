@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Garbage;
 use App\Models\Owner;
+use App\Models\PropertyType;
 use App\Models\User;
 use Carbon\Carbon;
 use DateTime;
@@ -135,6 +136,35 @@ class SyncController extends Controller {
     
             // If there isn't any last_date param, return all data
             return response()->json(Owner::query()->get());
+        } catch (Exception $e) {
+            return response()->json([ 'error' => strval($e) ], 500);
+        }
+    }
+
+    /**
+     * Send PropertyTypes data
+     * 
+     * @param Request $request request data
+     */
+    public function syncPropertyTypes(Request $request) {
+
+        try {
+            // Check for last_date request param
+            if (isset($request["last_date"])) {
+                $last_date = date('Y-m-d H:i:s', strtotime($request["last_date"]));
+                $propertyTypeQuery = PropertyType::query()->where('updated_at', '>', new DateTime($last_date));
+    
+                $deletedQuery = Garbage::query()->where('table', '=', 'property_types')->where('updated_at', '>', new DateTime($last_date));
+                return response()->json(
+                    [
+                        'propertyTypes' => $propertyTypeQuery->get(),
+                        'deleted' => $deletedQuery->get(),
+                    ]
+                );
+            }
+    
+            // If there isn't any last_date param, return all data
+            return response()->json(PropertyType::query()->get());
         } catch (Exception $e) {
             return response()->json([ 'error' => strval($e) ], 500);
         }
