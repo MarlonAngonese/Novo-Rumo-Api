@@ -23,6 +23,7 @@ class PropertyFactory extends Factory
             'code' => null,
             'has_geo' => $this->faker->boolean(),
             'qty_people' => random_int(1, 10),
+            'has_geo_board' => $this->faker->boolean(),
             'has_cams' => $this->faker->boolean(),
             'has_phone_signal' => $this->faker->boolean(),
             'has_internet' => $this->faker->boolean(),
