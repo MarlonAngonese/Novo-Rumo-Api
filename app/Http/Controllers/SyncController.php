@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Garbage;
 use App\Models\Owner;
+use App\Models\Property;
 use App\Models\PropertyType;
 use App\Models\User;
 use Carbon\Carbon;
@@ -165,6 +166,80 @@ class SyncController extends Controller {
     
             // If there isn't any last_date param, return all data
             return response()->json(PropertyType::query()->get());
+        } catch (Exception $e) {
+            return response()->json([ 'error' => strval($e) ], 500);
+        }
+    }
+
+    /**
+     * Send Properties data
+     * 
+     * @param Request $request request data
+     */
+    public function syncProperties(Request $request) {
+
+        try {
+            if ($request->method() == "POST") {
+                
+                $json = json_decode($request->getContent(), true);
+                $properties = $json['properties'];
+                $propertiesDeleted = $json['deleted'];
+
+                foreach ($properties as $property) {
+                    $existingProperty = Property::find($property["_id"]);
+
+                    if (!$existingProperty) { // New Property
+                        $propertyData = new Property;
+                    } else { // Property exists
+                        $propertyData = $existingProperty;
+                    }
+                    
+                    $propertyData->_id = new ObjectId($property["_id"]);
+                    $propertyData->code = $property["code"];
+                    $propertyData->has_geo_board = $property["has_geo_board"];
+                    $propertyData->qty_people = $property["qty_people"];
+                    $propertyData->has_cams = $property["has_cams"];
+                    $propertyData->has_phone_signal = $property["has_phone_signal"];
+                    $propertyData->has_internet = $property["has_internet"];
+                    $propertyData->has_gun = $property["has_gun"];
+                    $propertyData->has_gun_local = $property["has_gun_local"];
+                    $propertyData->gun_local_description = $property["gun_local_description"];
+                    $propertyData->qty_agricultural_defensives = $property["qty_agricultural_defensives"];
+                    $propertyData->observations = $property["observations"];
+                    $propertyData->fk_owner_id = $property["fk_owner_id"];
+                    $propertyData->fk_property_type_id = $property["fk_property_type_id"];
+                    $propertyData->created_at = new Carbon($property["createdAt"]);
+                    $propertyData->updated_at = new Carbon($property["updatedAt"]);
+
+                    $propertyData->save();
+                }
+
+                foreach ($propertiesDeleted as $uD) {
+                    $propertyDeleted = Property::find($uD);
+                    $propertyDeleted->delete();
+                }
+
+                return response()->json([
+                    'updated' => true,
+                ], 201);
+            }
+    
+            // Check for last_date request param
+            if (isset($request["last_date"])) {
+                $last_date = date('Y-m-d H:i:s', strtotime($request["last_date"]));
+                $propertyQuery = Property::query()->where('updated_at', '>', new DateTime($last_date));
+    
+                $deletedQuery = Garbage::query()->where('table', '=', 'properties')->where('updated_at', '>', new DateTime($last_date));
+                return response()->json(
+                    [
+                        'properties' => $propertyQuery->get(),
+                        'deleted' => $deletedQuery->get(),
+                    ]
+                );
+            }
+    
+            // If there isn't any last_date param, return all data
+            return response()->json(Property::query()->get());
         } catch (Exception $e) {
             return response()->json([ 'error' => strval($e) ], 500);
         }

@@ -18,9 +18,12 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::post('auth/login', [AuthController::class, 'login']);
-Route::get('sync/users', [SyncController::class, 'syncUsers']);
-Route::post('sync/users', [SyncController::class, 'syncUsers']);
 
 Route::group(['middleware' => ['apiJwt']], function () {
     Route::get('users', [UserController::class, 'index']);
+
+    Route::any('sync/users', [SyncController::class, 'syncUsers']);
+    Route::any('sync/owners', [SyncController::class, 'syncOwners']);
+    Route::any('sync/property-types', [SyncController::class, 'syncPropertyTypes']);
+    Route::any('sync/properties', [SyncController::class, 'syncProperties']);
 });
