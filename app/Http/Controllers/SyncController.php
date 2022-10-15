@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Garbage;
+use App\Models\Owner;
 use App\Models\User;
 use Carbon\Carbon;
 use DateTime;
@@ -71,6 +72,69 @@ class SyncController extends Controller {
     
             // If there isn't any last_date param, return all data
             return response()->json(User::query()->get());
+        } catch (Exception $e) {
+            return response()->json([ 'error' => strval($e) ], 500);
+        }
+    }
+
+    /**
+     * Send Owners data
+     * 
+     * @param Request $request request data
+     */
+    public function syncOwners(Request $request) {
+
+        try {
+            if ($request->method() == "POST") {
+                
+                $json = json_decode($request->getContent(), true);
+                $owners = $json['owners'];
+                $ownersDeleted = $json['deleted'];
+
+                foreach ($owners as $owner) {
+                    $existingOwner = Owner::find($owner["_id"]);
+
+                    if (!$existingOwner) { // New Owner
+                        $ownerData = new Owner;
+                    } else { // Owner exists
+                        $ownerData = $existingOwner;
+                    }
+                    
+                    $ownerData->_id = new ObjectId($owner["_id"]);
+                    $ownerData->firstname = $owner["firstname"];
+                    $ownerData->lastname = $owner["lastname"];
+                    $ownerData->created_at = new Carbon($owner["createdAt"]);
+                    $ownerData->updated_at = new Carbon($owner["updatedAt"]);
+
+                    $ownerData->save();
+                }
+
+                foreach ($ownersDeleted as $oD) {
+                    $ownersDeleted = Owner::find($oD);
+                    $ownersDeleted->delete();
+                }
+
+                return response()->json([
+                    'updated' => true,
+                ], 201);
+            }
+    
+            // Check for last_date request param
+            if (isset($request["last_date"])) {
+                $last_date = date('Y-m-d H:i:s', strtotime($request["last_date"]));
+                $ownerQuery = Owner::query()->where('updated_at', '>', new DateTime($last_date));
+    
+                $deletedQuery = Garbage::query()->where('table', '=', 'owners')->where('updated_at', '>', new DateTime($last_date));
+                return response()->json(
+                    [
+                        'owners' => $ownerQuery->get(),
+                        'deleted' => $deletedQuery->get(),
+                    ]
+                );
+            }
+    
+            // If there isn't any last_date param, return all data
+            return response()->json(Owner::query()->get());
         } catch (Exception $e) {
             return response()->json([ 'error' => strval($e) ], 500);
         }
