@@ -21,6 +21,12 @@ Route::post('auth/login', [AuthController::class, 'login']);
 
 Route::group(['middleware' => ['apiJwt']], function () {
     Route::get('users', [UserController::class, 'index']);
+    Route::get('users/show/{id}', [UserController::class, 'show']);
+
+    Route::post('users/add', [UserController::class, 'store']);
+    Route::post('users/edit/{id}', [UserController::class, 'update']);
+
+    Route::delete('users/delete/{id}', [UserController::class, 'destroy']);
 
     Route::any('sync/users', [SyncController::class, 'syncUsers']);
     Route::any('sync/owners', [SyncController::class, 'syncOwners']);

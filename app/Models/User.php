@@ -13,6 +13,8 @@ class User extends Authenticatable implements JWTSubject
     protected $dates = ['created_at', 'updated_at'];
     public $timestamps = true;
 
+    public $fillable = ['name', 'email', 'password'];
+
     public function getJWTIdentifier()
     {
         return $this->getKey();
