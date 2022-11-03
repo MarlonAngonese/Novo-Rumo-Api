@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Property;
+use App\Models\PropertyVisit;
 use App\Models\User;
 use App\Models\UserVisit;
 use App\Models\Visit;
@@ -60,42 +62,58 @@ class VisitController extends Controller
      */
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|unique:users|max:255|email:rfc,dns',
-            'name' => 'required|max:255',
-            'password' => 'required|min:8|max:255'
-        ], [
-            'email.email' => 'Este formato de E-mail é inválido!',
-            'email.unique' => 'Este E-mail já está em uso!',
-            'email.required' => 'O campo E-mail é requerido!',
-            'email.size' => 'O campo E-mail precisa ter menos de :max caracteres!',
-            'name.required' => 'O campo Nome é requerido!',
-            'name.size' => 'O campo Nome precisa ter menos de :max caracteres!',
-            'password.required' => 'O campo Senha é requerido!',
-            'password.size' => 'O campo Senha precisa ter entre :min e :max caracteres!',
+        $visit = new Visit([
+            'car' => $request->input("car"),
+            'date' => $request->input("date"),
         ]);
 
-        if ($validator->fails()) {
+        $users = $request->input('users');
+
+        if (empty($users)) {
             return response()->json([
-                'error' => $validator->errors()->first(),
+                'error' => "Nenhum servidor informado!",
             ], 400);
         }
 
-        $user = new User($request->input());
+        $property = Property::where('_id', '=', $request->input('fk_property_id'))->first();
+    
+        if (!$property) {
+            return response()->json([
+                'error' => "Esta propriedade não existe",
+            ], 400);
+        }
 
-        // Encode the password
-        $user->password = Hash::make(
-            $request->input('password'),
-            [
-                'rounds' => 10,
-                'salt' => env('SALT'),
-            ],
-        );
+        // Save visits
+        $visit->save();
 
-        $user->save();
+        // Save property_visits
+        $property_visit = new PropertyVisit([
+            'fk_property_id' => $property->_id,
+            'fk_visit_id' => $visit->_id
+        ]);
+
+        $property_visit->save();
+
+        // Save user_visits
+        foreach ($users as $key => $user) {
+            $currentUser = User::where('_id', '=', $request->input('users')[$key])->first();
+    
+            if (!$currentUser) {
+                return response()->json([
+                    'error' => "Este servidor não existe",
+                ], 400);
+            }
+
+            $user_visit = new UserVisit([
+                'fk_visit_id' => $visit->_id,
+                'fk_user_id' => $currentUser->_id,
+            ]);
+
+            $user_visit->save();
+        }
 
         return response()->json([
-            'user' => $user,
+            'visit' => $visit,
         ], 201);
     }
 
