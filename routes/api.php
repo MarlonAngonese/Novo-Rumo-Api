@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\OwnerController;
 use App\Http\Controllers\SyncController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VisitController;
@@ -34,6 +35,9 @@ Route::group(['middleware' => ['apiJwt']], function () {
     Route::post('visits/add', [VisitController::class, 'store']);
     Route::post('visits/edit/{id}', [VisitController::class, 'update']);
     Route::delete('visits/delete/{id}', [VisitController::class, 'destroy']);
+
+    // Owners
+    Route::get('owners', [OwnerController::class, 'index']);
 
     Route::any('sync/users', [SyncController::class, 'syncUsers']);
     Route::any('sync/owners', [SyncController::class, 'syncOwners']);
