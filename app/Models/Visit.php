@@ -12,5 +12,5 @@ class Visit extends Model
     protected $dates = ['created_at', 'updated_at', 'date'];
     public $timestamps = true;
 
-    public $fillable = ['car', 'date'];
+    public $fillable = ['car', 'date', 'fk_property_id'];
 }

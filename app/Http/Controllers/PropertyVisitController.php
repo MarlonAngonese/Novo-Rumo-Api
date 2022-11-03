@@ -2,17 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Property;
 use App\Models\PropertyVisit;
-use App\Models\User;
-use App\Models\UserVisit;
-use App\Models\Visit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 
-class VisitController extends Controller
+class PropertyVisitController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -21,97 +16,84 @@ class VisitController extends Controller
      */
     public function index(Request $request)
     {
-        $visits = Visit::query();
-        $users = [];
+        $property_visits = PropertyVisit::query();
+        return $property_visits->get();
 
-        // Implements order by name
-        $visits->orderBy('date', $request->input('sort', 'asc'));
+        
 
-        // Implements mongodb pagination
-        $elementsPerPage = 25;
-        $page = $request->input('page', 1);
-        $total = $visits->count();
+        // $query = User::query();
 
-        $visits = $visits->offset(($page - 1) * $elementsPerPage)->limit($elementsPerPage)->get();
+        // // Implements search by name and email
+        // if ($search = $request->input('search')) {
+        //     $query->where('name', 'regexp', "/.*$search/i")
+        //         ->orWhere('email', 'regexp', "/.*$search/i");
+        // }
 
-        foreach ($visits as $visit_key => $visit) {
-            //Set Users
-            $user_visits = UserVisit::query()->where('fk_visit_id', '=', $visit->_id)->get();
+        // // Implements order by name
+        // $query->orderBy('name', $request->input('sort', 'asc'));
 
-            foreach($user_visits as $key => $user_visit) {
-                $users[$key] = User::query()->where('_id', '=', $user_visit->fk_user_id)->first();
-            }
+        // // Implements mongodb pagination
+        // $elementsPerPage = 25;
+        // $page = $request->input('page', 1);
+        // $total = $query->count();
 
-            $visits[$visit_key]->users = $users;
-            $users = [];
+        // $result = $query->offset(($page - 1) * $elementsPerPage)->limit($elementsPerPage)->get();
 
-            //Set property
-            $visit->property = Property::where("_id", "=", $visit->fk_property_id)->first();
-        }
-
-        return [
-            'visits' => $visits,
-            'total' => $total,
-            'page' => $page,
-            'last_page' => ceil($total / $elementsPerPage)
-        ];
+        // return [
+        //     'users' => $result,
+        //     'total' => $total,
+        //     'page' => $page,
+        //     'last_page' => ceil($total / $elementsPerPage),
+        //     'search' => $search,
+        // ];
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        $visit = new Visit([
-            'car' => $request->input("car"),
-            'date' => $request->input("date"),
-            'fk_property_id' => $request->input('fk_property_id'),
-        ]);
+    // /**
+    //  * Store a newly created resource in storage.
+    //  *
+    //  * @param  \Illuminate\Http\Request  $request
+    //  * @return \Illuminate\Http\Response
+    //  */
+    // public function store(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'email' => 'required|unique:users|max:255|email:rfc,dns',
+    //         'name' => 'required|max:255',
+    //         'password' => 'required|min:8|max:255'
+    //     ], [
+    //         'email.email' => 'Este formato de E-mail é inválido!',
+    //         'email.unique' => 'Este E-mail já está em uso!',
+    //         'email.required' => 'O campo E-mail é requerido!',
+    //         'email.size' => 'O campo E-mail precisa ter menos de :max caracteres!',
+    //         'name.required' => 'O campo Nome é requerido!',
+    //         'name.size' => 'O campo Nome precisa ter menos de :max caracteres!',
+    //         'password.required' => 'O campo Senha é requerido!',
+    //         'password.size' => 'O campo Senha precisa ter entre :min e :max caracteres!',
+    //     ]);
 
-        $users = $request->input('users');
+    //     if ($validator->fails()) {
+    //         return response()->json([
+    //             'error' => $validator->errors()->first(),
+    //         ], 400);
+    //     }
 
-        if (empty($users)) {
-            return response()->json([
-                'error' => "Nenhum servidor informado!",
-            ], 400);
-        }
+    //     $user = new User($request->input());
 
-        $property = Property::where('_id', '=', $request->input('fk_property_id'))->first();
-    
-        if (!$property) {
-            return response()->json([
-                'error' => "Esta propriedade não existe",
-            ], 400);
-        }
+    //     // Encode the password
+    //     $user->password = Hash::make(
+    //         $request->input('password'),
+    //         [
+    //             'rounds' => 10,
+    //             'salt' => env('SALT'),
+    //         ],
+    //     );
 
-        // Save visits
-        $visit->save();
+    //     $user->save();
 
-        // Save user_visits
-        foreach ($users as $key => $user) {
-            $currentUser = User::where('_id', '=', $request->input('users')[$key])->first();
-    
-            if (!$currentUser) {
-                return response()->json([
-                    'error' => "Este servidor não existe",
-                ], 400);
-            }
-
-            $user_visit = new UserVisit([
-                'fk_visit_id' => $visit->_id,
-                'fk_user_id' => $currentUser->_id,
-            ]);
-
-            $user_visit->save();
-        }
-
-        return response()->json([
-            'visit' => $visit,
-        ], 201);
-    }
+    //     return response()->json([
+    //         'user' => $user,
+    //     ], 201);
+    // }
 
     // /**
     //  * Display the specified resource.
