@@ -181,4 +181,17 @@ class UserController extends Controller
             'deleted' => true,
         ], 204);
     }
+
+    /**
+     * Return all users names
+     * 
+     * @return User $users
+     */
+    public function names() {
+        $users = User::query()->get(["_id", "name"]);
+
+        return response()->json([
+            'users' => $users,
+        ], 200);
+    }
 }

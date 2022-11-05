@@ -28,6 +28,7 @@ Route::post('auth/login', [AuthController::class, 'login']);
 Route::group(['middleware' => ['apiJwt']], function () {
     // Users
     Route::get('users', [UserController::class, 'index']);
+    Route::get('users/names', [UserController::class, 'names']);
     Route::get('users/show/{id}', [UserController::class, 'show']);
     Route::post('users/add', [UserController::class, 'store']);
     Route::post('users/edit/{id}', [UserController::class, 'update']);
