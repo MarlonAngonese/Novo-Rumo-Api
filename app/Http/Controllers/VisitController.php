@@ -32,8 +32,7 @@ class VisitController extends Controller
         if ($searchUser = $request->input('u')) {
             $queryUser = User::query();
 
-            $queryUser->where('name', 'regexp', "/.*$searchUser/i")
-                ->orWhere('email', 'regexp', "/.*$searchUser/i");
+            $queryUser->where('_id', '=', $searchUser);
 
             $users = $queryUser->get();
 
