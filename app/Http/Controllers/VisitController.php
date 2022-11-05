@@ -22,8 +22,61 @@ class VisitController extends Controller
     public function index(Request $request)
     {
         $visits = Visit::query();
-        $users = [];
 
+        $visits_list = [];
+
+        $hasSearch = $request->input('u') || $request->input('p');
+
+        /** Search **/
+        // Search By User
+        if ($searchUser = $request->input('u')) {
+            $queryUser = User::query();
+
+            $queryUser->where('name', 'regexp', "/.*$searchUser/i")
+                ->orWhere('email', 'regexp', "/.*$searchUser/i");
+
+            $users = $queryUser->get();
+
+            $users_ids = [];
+
+            foreach ($users as $user) {
+                array_push($users_ids, $user->_id);
+            }
+
+            $user_visits = UserVisit::whereIn('fk_user_id', $users_ids)->get();
+
+            foreach ($user_visits as $user_visit) {
+                if (!in_array($user_visit->fk_visit_id, $visits_list, true)) {
+                    array_push($visits_list, $user_visit->fk_visit_id);
+                }
+            }
+        }
+
+        // Search By Property
+        if ($searchProperty = $request->input('p')) {
+            $queryProperty = Property::query();
+
+            $queryProperty->where('code', 'regexp', "/.*$searchProperty/i");
+
+            $properties = $queryProperty->get();
+
+            $property_ids = [];
+
+            foreach ($properties as $property) {
+                array_push($property_ids, $property->_id);
+            }
+
+            $property_visits = Visit::whereIn('fk_property_id', $property_ids)->get();
+
+            foreach ($property_visits as $property_visit) {
+                if (!in_array($property_visit->_id, $visits_list, true)) {
+                    array_push($visits_list, $property_visit->_id);
+                }
+            }
+        }
+
+        if ($hasSearch) $visits->whereIn('_id', $visits_list);
+        
         // Implements order by name
         $visits->orderBy('date', $request->input('sort', 'asc'));
 
@@ -34,6 +87,7 @@ class VisitController extends Controller
 
         $visits = $visits->offset(($page - 1) * $elementsPerPage)->limit($elementsPerPage)->get();
 
+        $users = [];
         foreach ($visits as $visit_key => $visit) {
             //Set Users
             $user_visits = UserVisit::query()->where('fk_visit_id', '=', $visit->_id)->get();
@@ -113,89 +167,112 @@ class VisitController extends Controller
         ], 201);
     }
 
-    // /**
-    //  * Display the specified resource.
-    //  *
-    //  * @param  int  $id
-    //  * @return \Illuminate\Http\Response
-    //  */
-    // public function show($id)
-    // {
-    //     $user = User::find($id);
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        $visit = Visit::find($id);
 
-    //     return response()->json([
-    //         'user' => $user,
-    //     ], 200);
-    // }
+        //Set Users
+        $users = [];
+        $user_visits = UserVisit::query()->where('fk_visit_id', '=', $visit->_id)->get();
 
-    // /**
-    //  * Update the specified resource in storage.
-    //  *
-    //  * @param  int  $id
-    //  * @param  \Illuminate\Http\Request  $request
-    //  * @return \Illuminate\Http\Response
-    //  */
-    // public function update($id, Request $request)
-    // {
-    //     $validator = Validator::make($request->all(), [
-    //         'email' => 'required|max:255|email:rfc,dns',
-    //         'name' => 'required|max:255',
-    //         'password' => 'required|min:8|max:255'
-    //     ], [
-    //         'email.email' => 'Este formato de E-mail é inválido!',
-    //         'email.required' => 'O campo E-mail é requerido!',
-    //         'email.size' => 'O campo E-mail precisa ter menos de :max caracteres!',
-    //         'name.required' => 'O campo Nome é requerido!',
-    //         'name.size' => 'O campo Nome precisa ter menos de :max caracteres!',
-    //         'password.required' => 'O campo Senha é requerido!',
-    //         'password.size' => 'O campo Senha precisa ter entre :min e :max caracteres!',
-    //     ]);
+        foreach($user_visits as $key => $user_visit) {
+            $users[$key] = User::query()->where('_id', '=', $user_visit->fk_user_id)->first();
+        }
 
-    //     $user = User::where('email', $request->input('email'))->first();
+        $visit->users = $users;
 
-    //     if ($user->_id != $id) {
-    //         return response()->json([
-    //             'error' => 'Este E-mail já está em uso!',
-    //         ], 400);
-    //     }
+        //Set property
+        $visit->property = Property::where("_id", "=", $visit->fk_property_id)->first();
 
-    //     if ($validator->fails()) {
-    //         return response()->json([
-    //             'error' => $validator->errors()->first(),
-    //         ], 400);
-    //     }
+        return response()->json([
+            'visit' => $visit,
+        ], 200);
+    }
 
-    //     $user = User::find($id);
-    //     $user->update($request->all());
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  int  $id
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function update($id, Request $request)
+    {
+        $visit = Visit::find($id);
 
-    //     // Encode the password
-    //     $user->password = Hash::make(
-    //         $request->input('password'),
-    //         [
-    //             'rounds' => 10,
-    //             'salt' => env('SALT'),
-    //         ],
-    //     );
+        $users = $request->input('users');
 
-    //     $user->save();
+        if (empty($users)) {
+            return response()->json([
+                'error' => "Nenhum servidor informado!",
+            ], 400);
+        }
 
-    //     return response()->json([
-    //         'user' => $user,
-    //     ], 201);
-    // }
+        $property = Property::where('_id', '=', $request->input('fk_property_id'))->first();
+    
+        if (!$property) {
+            return response()->json([
+                'error' => "Esta propriedade não existe",
+            ], 400);
+        }
 
-    // /**
-    //  * Remove the specified resource from storage.
-    //  *
-    //  * @param  int  $id
-    //  * @return \Illuminate\Http\Response
-    //  */
-    // public function destroy($id)
-    // {
-    //     User::find($id)->delete();
+        // Save visits
+        $visit->update($request->all());
+        $visit->save();
 
-    //     return response()->json([
-    //         'deleted' => true,
-    //     ], 204);
-    // }
+        $user_visits = UserVisit::query()->where('fk_visit_id', '=', $visit->_id)->get();
+
+        foreach($user_visits as $user_visit) {
+            UserVisit::find($user_visit->_id)->delete();
+        }
+
+        // Save user_visits
+        foreach ($users as $key => $user) {
+            $currentUser = User::where('_id', '=', $request->input('users')[$key])->first();
+    
+            if (!$currentUser) {
+                return response()->json([
+                    'error' => "Este servidor não existe",
+                ], 400);
+            }
+
+            $user_visit = new UserVisit([
+                'fk_visit_id' => $visit->_id,
+                'fk_user_id' => $currentUser->_id,
+            ]);
+
+            $user_visit->save();
+        }
+
+        return response()->json([
+            'visit' => $visit,
+        ], 201);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        Visit::find($id)->delete();
+
+        $user_visits = UserVisit::query()->where('fk_visit_id', '=', $id)->get();
+
+        foreach ($user_visits as $user_visit) {
+            UserVisit::find($user_visit->_id)->delete();
+        }
+
+        return response()->json([
+            'deleted' => true,
+        ], 204);
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\UserVisit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -170,6 +171,11 @@ class UserController extends Controller
     public function destroy($id)
     {
         User::find($id)->delete();
+
+        $user_visits = UserVisit::query()->where('fk_user_id', '=', $id)->id();
+        foreach($user_visits as $user_visit) {
+            UserVisit::find($user_visit->_id)->delete();
+        }
 
         return response()->json([
             'deleted' => true,

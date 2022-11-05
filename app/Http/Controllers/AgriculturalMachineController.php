@@ -2,16 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Owner;
-use App\Models\Property;
+use App\Models\AgriculturalMachine;
 use App\Models\PropertyAgriculturalMachine;
-use App\Models\PropertyVehicle;
-use App\Models\Request as ModelsRequest;
-use App\Models\UserVisit;
-use App\Models\Visit;
 use Illuminate\Http\Request;
 
-class OwnerController extends Controller
+class AgriculturalMachineController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -20,7 +15,7 @@ class OwnerController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Owner::query();
+        $query = AgriculturalMachine::query();
 
         // Implements search by name and email
         if ($search = $request->input('search')) {
@@ -38,7 +33,7 @@ class OwnerController extends Controller
         $result = $query->offset(($page - 1) * $elementsPerPage)->limit($elementsPerPage)->get();
 
         return [
-            'owners' => $result,
+            'agricultural_machines' => $result,
             'total' => $total,
             'page' => $page,
             'last_page' => ceil($total / $elementsPerPage),
@@ -54,12 +49,12 @@ class OwnerController extends Controller
      */
     public function store(Request $request)
     {
-        $owner = new Owner($request->input());
+        $agricultural_machine = new AgriculturalMachine($request->input());
 
-        $owner->save();
+        $agricultural_machine->save();
 
         return response()->json([
-            'owner' => $owner,
+            'agricultural_machine' => $agricultural_machine,
         ], 201);
     }
 
@@ -71,10 +66,10 @@ class OwnerController extends Controller
      */
     public function show($id)
     {
-        $owner = Owner::find($id);
+        $agricultural_machine = AgriculturalMachine::find($id);
 
         return response()->json([
-            'owner' => $owner,
+            'agricultural_machine' => $agricultural_machine,
         ], 200);
     }
 
@@ -87,13 +82,13 @@ class OwnerController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $owner = Owner::find($id);
-        $owner->update($request->all());
+        $agricultural_machine = AgriculturalMachine::find($id);
+        $agricultural_machine->update($request->all());
 
-        $owner->save();
+        $agricultural_machine->save();
 
         return response()->json([
-            'owner' => $owner,
+            'agricultural_machine' => $agricultural_machine,
         ], 201);
     }
 
@@ -105,33 +100,11 @@ class OwnerController extends Controller
      */
     public function destroy($id)
     {
-        Owner::find($id)->delete();
+        AgriculturalMachine::find($id)->delete();
 
-        $properties = Property::query()->where('fk_owner_id', '=', $id)->get();
-        foreach ($properties as $property) {
-            $property_vehicles = PropertyVehicle::query()->where('fk_property_id', '=', $property->_id)->get();
-            $property_agricultural_machines = PropertyAgriculturalMachine::query()->where('fk_property_id', '=', $property->_id)->get();
-            $requests = ModelsRequest::query()->where('fk_property_id', '=', $property->_id)->get();
-            $visits = Visit::query()->where('fk_property_id', '=', $property->_id)->get();
-
-            foreach($property_vehicles as $property_vehicle) {
-                PropertyVehicle::find($property_vehicle->_id)->delete();
-            }
-            foreach($property_agricultural_machines as $property_agricultural_machine) {
-                PropertyAgriculturalMachine::find($property_agricultural_machine->_id)->delete();
-            }
-            foreach($requests as $request) {
-                ModelsRequest::find($request->_id)->delete();
-            }
-            foreach($visits as $visit) {
-                $user_visits = UserVisit::query()->where('fk_visit_id', '=', $visit->_id)->get();
-                foreach ($user_visits as $user_visit) {
-                    UserVisit::find($user_visit->_id)->delete();
-                }
-                Visit::find($visit->_id)->delete();
-            }
-
-            Property::find($property->_id)->delete();
+        $property_agricultural_machines = PropertyAgriculturalMachine::query()->where('fk_agricultural_machine_id', '=', $id)->get();
+        foreach($property_agricultural_machines as $property_agricultural_machine) {
+            PropertyAgriculturalMachine::find($property_agricultural_machine->_id)->delete();
         }
 
         return response()->json([

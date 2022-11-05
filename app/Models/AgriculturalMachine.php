@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Jenssegers\Mongodb\Eloquent\Model;
 
-class PropertyType extends Model
+class AgriculturalMachine extends Model
 {
     use HasFactory;
 
@@ -14,3 +14,4 @@ class PropertyType extends Model
 
     public $fillable = ['name'];
 }
+
