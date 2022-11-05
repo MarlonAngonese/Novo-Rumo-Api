@@ -337,4 +337,18 @@ class PropertyController extends Controller
             'deleted' => true,
         ], 204);
     }
+
+    /**
+     * Return Property Codes
+     * 
+     * @return Property properties
+     */
+    public function codes() {
+        $properties = Property::query()->where('code', "!=", null)->get(["_id", "code"]);
+
+        return response()->json([
+            'properties' => $properties,
+        ], 200);
+    }
+    
 }

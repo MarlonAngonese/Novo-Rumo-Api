@@ -71,6 +71,7 @@ Route::group(['middleware' => ['apiJwt']], function () {
 
     // Properties
     Route::get('properties', [PropertyController::class, 'index']);
+    Route::get('properties/codes', [PropertyController::class, 'codes']);
     Route::get('properties/show/{id}', [PropertyController::class, 'show']);
     Route::post('properties/add', [PropertyController::class, 'store']);
     Route::post('properties/edit/{id}', [PropertyController::class, 'update']);
