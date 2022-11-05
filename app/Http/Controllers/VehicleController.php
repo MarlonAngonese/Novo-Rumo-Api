@@ -6,7 +6,7 @@ use App\Models\PropertyVehicle;
 use App\Models\Vehicle;
 use Illuminate\Http\Request;
 
-class VechicleController extends Controller
+class VehicleController extends Controller
 {
     /**
      * Display a listing of the resource.
