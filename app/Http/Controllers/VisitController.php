@@ -102,8 +102,11 @@ class VisitController extends Controller
             $visit->property = Property::where("_id", "=", $visit->fk_property_id)->first();
         }
 
+        $users = User::query()->get(['_id', 'name']);
+
         return [
             'visits' => $visits,
+            'users' => $users,
             'total' => $total,
             'page' => $page,
             'last_page' => ceil($total / $elementsPerPage)
