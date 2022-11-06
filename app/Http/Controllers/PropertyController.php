@@ -345,9 +345,11 @@ class PropertyController extends Controller
      */
     public function codes() {
         $properties = Property::query()->where('code', "!=", null)->get(["_id", "code"]);
+        $users = User::query()->get(['_id', 'name']);
 
         return response()->json([
             'properties' => $properties,
+            'users' => $users,
         ], 200);
     }
     
