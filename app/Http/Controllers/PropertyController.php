@@ -39,11 +39,7 @@ class PropertyController extends Controller
         if ($searchOwner = $request->input('o')) {
             $queryOwner = Owner::query();
 
-            $queryOwner->where('firstname', 'regexp', "/.*$searchOwner/i")
-                ->orWhere('lastname', 'regexp', "/.*$searchOwner/i")
-                ->orWhere('cpf', 'regexp', "/.*$searchOwner/i")
-                ->orWhere('phone1', 'regexp', "/.*$searchOwner/i")
-                ->orWhere('phone2', 'regexp', "/.*$searchOwner/i");
+            $queryOwner->where('_id', '=', $searchOwner);
 
             $owners = $queryOwner->get();
 
