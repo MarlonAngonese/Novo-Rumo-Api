@@ -111,4 +111,17 @@ class AgriculturalMachineController extends Controller
             'deleted' => true,
         ], 204);
     }
+
+    /**
+     * Return all agricultural_machines names
+     * 
+     * @return AgriculturalMachine $agricultural_machines
+     */
+    public function names() {
+        $agricultural_machines = AgriculturalMachine::query()->get(["_id", "name"]);
+
+        return response()->json([
+            'agricultural_machines' => $agricultural_machines,
+        ], 200);
+    }
 }

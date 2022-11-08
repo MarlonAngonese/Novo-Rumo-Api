@@ -138,4 +138,17 @@ class OwnerController extends Controller
             'deleted' => true,
         ], 204);
     }
+
+    /**
+     * Return all owners names
+     * 
+     * @return Owner $owners
+     */
+    public function names() {
+        $owners = Owner::query()->get(["_id", "firstname", "lastname"]);
+
+        return response()->json([
+            'owners' => $owners,
+        ], 200);
+    }
 }

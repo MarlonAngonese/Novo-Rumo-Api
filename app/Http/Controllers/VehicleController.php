@@ -112,4 +112,17 @@ class VehicleController extends Controller
             'deleted' => true,
         ], 204);
     }
+
+    /**
+     * Return all vehicle names
+     * 
+     * @return Vehicle $vehicles
+     */
+    public function names() {
+        $vehicles = Vehicle::query()->get(["_id", "name", "brand"]);
+
+        return response()->json([
+            'vehicles' => $vehicles,
+        ], 200);
+    }
 }

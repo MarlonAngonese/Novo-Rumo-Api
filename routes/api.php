@@ -44,6 +44,7 @@ Route::group(['middleware' => ['apiJwt']], function () {
     // Property Types
     Route::get('property-types', [PropertyTypeController::class, 'index']);
     Route::get('property-types/show/{id}', [PropertyTypeController::class, 'show']);
+    Route::get('property-types/names', [PropertyTypeController::class, 'names']);
     Route::post('property-types/add', [PropertyTypeController::class, 'store']);
     Route::post('property-types/edit/{id}', [PropertyTypeController::class, 'update']);
     Route::delete('property-types/delete/{id}', [PropertyTypeController::class, 'destroy']);
@@ -51,6 +52,7 @@ Route::group(['middleware' => ['apiJwt']], function () {
     // Owners
     Route::get('owners', [OwnerController::class, 'index']);
     Route::get('owners/show/{id}', [OwnerController::class, 'show']);
+    Route::get('owners/names', [OwnerController::class, 'names']);
     Route::post('owners/add', [OwnerController::class, 'store']);
     Route::post('owners/edit/{id}', [OwnerController::class, 'update']);
     Route::delete('owners/delete/{id}', [OwnerController::class, 'destroy']);
@@ -58,6 +60,7 @@ Route::group(['middleware' => ['apiJwt']], function () {
     // Vehicles
     Route::get('vehicles', [VehicleController::class, 'index']);
     Route::get('vehicles/show/{id}', [VehicleController::class, 'show']);
+    Route::get('vehicles/names', [VehicleController::class, 'names']);
     Route::post('vehicles/add', [VehicleController::class, 'store']);
     Route::post('vehicles/edit/{id}', [VehicleController::class, 'update']);
     Route::delete('vehicles/delete/{id}', [VehicleController::class, 'destroy']);
@@ -65,6 +68,7 @@ Route::group(['middleware' => ['apiJwt']], function () {
     // Agricultural Machines
     Route::get('agricultural-machines', [AgriculturalMachineController::class, 'index']);
     Route::get('agricultural-machines/show/{id}', [AgriculturalMachineController::class, 'show']);
+    Route::get('agricultural-machines/names', [AgriculturalMachineController::class, 'names']);
     Route::post('agricultural-machines/add', [AgriculturalMachineController::class, 'store']);
     Route::post('agricultural-machines/edit/{id}', [AgriculturalMachineController::class, 'update']);
     Route::delete('agricultural-machines/delete/{id}', [AgriculturalMachineController::class, 'destroy']);

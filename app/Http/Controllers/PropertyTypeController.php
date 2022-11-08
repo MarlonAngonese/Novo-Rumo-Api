@@ -105,4 +105,17 @@ class PropertyTypeController extends Controller
             'deleted' => true,
         ], 204);
     }
+
+    /**
+     * Return all property types names
+     * 
+     * @return PropertyType $property_type
+     */
+    public function names() {
+        $property_types = PropertyType::query()->get(["_id", "name"]);
+
+        return response()->json([
+            'prooerty_types' => $property_types,
+        ], 200);
+    }
 }
