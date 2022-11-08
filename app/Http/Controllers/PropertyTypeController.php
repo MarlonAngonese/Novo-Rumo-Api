@@ -115,7 +115,7 @@ class PropertyTypeController extends Controller
         $property_types = PropertyType::query()->get(["_id", "name"]);
 
         return response()->json([
-            'prooerty_types' => $property_types,
+            'property_types' => $property_types,
         ], 200);
     }
 }
