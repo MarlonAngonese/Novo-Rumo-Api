@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Models\UserVisit;
 use App\Models\Vehicle;
 use App\Models\Visit;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -149,8 +150,14 @@ class PropertyController extends Controller
      */
     public function store(Request $request)
     {
-        $property = new Property($request->all());
-        $property->save();
+        try {
+            $property = new Property($request->all());
+            $property->save();
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => 'Erro ao salvar a propriedade'
+            ], 400);
+        }
 
         if ($vehicles = $request->input('vehicles')) {
             foreach ($vehicles as $vehicle) {
