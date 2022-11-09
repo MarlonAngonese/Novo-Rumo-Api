@@ -23,6 +23,8 @@ class Property extends Model
         'gun_local_description',
         'qty_agricultural_defensive',
         'observations',
+        'latitude',
+        'longitude',
         'fk_owner_id',
         'fk_property_type_id',
     ];

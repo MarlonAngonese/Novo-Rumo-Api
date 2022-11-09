@@ -24,7 +24,12 @@ class OwnerController extends Controller
 
         // Implements search by name and email
         if ($search = $request->input('search')) {
-            $query->where('name', 'regexp', "/.*$search/i");
+            $query->where('firstname', 'regexp', "/.*$search/i")
+                ->orWhere('lastname', 'regexp', "/.*$search/i")
+                ->orWhere('cpf', 'regexp', "/.*$search/i")
+                ->orWhere('phone1', 'regexp', "/.*$search/i")
+                ->orWhere('phone2', 'regexp', "/.*$search/i")
+                ->orWhere('address', 'regexp', "/.*$search/i");
         }
 
         // Implements order by name

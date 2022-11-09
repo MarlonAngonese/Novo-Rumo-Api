@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Property;
 use App\Models\User;
 use App\Models\UserVisit;
+use App\Models\Visit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -100,6 +102,33 @@ class UserController extends Controller
     public function show($id)
     {
         $user = User::find($id);
+
+        $user_visits = UserVisit::query()->where('fk_user_id', '=', $id)->get();
+
+        $visits = [];
+        foreach ($user_visits as $user_visit) {
+            //get garrison
+            $visit = Visit::query()->where('_id', '=', $user_visit->fk_visit_id)->first();
+            $garrison = UserVisit::query()->where('fk_visit_id', '=', $visit->_id)->get();
+
+            $users = [];
+            foreach ($garrison as $user_garrison) {
+                $userInstance = User::query()->where('_id', '=', $user_garrison->fk_user_id )->get(['name'])->first();
+                array_push($users, $userInstance->name);
+            }
+
+            //get property
+            $property = Property::query()->where('_id', '=', $visit->fk_property_id)->get(['code', 'latitude', 'longitude'])->first();
+
+            $visit = [
+                'garrison' => $users,
+                'property' => $property
+            ];
+
+            array_push($visits, $visit);
+        }
+
+        $user->visits = $visits;
 
         return response()->json([
             'user' => $user,

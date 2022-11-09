@@ -11,4 +11,6 @@ class Owner extends Model
 
     protected $dates = ['created_at', 'updated_at'];
     public $timestamps = true;
+
+    public $fillable = ['firstname', 'lastname', 'cpf', 'phone1', 'phone2', 'address'];
 }
