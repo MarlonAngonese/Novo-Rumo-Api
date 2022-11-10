@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Garbage;
 use App\Models\Property;
 use App\Models\PropertyVisit;
 use App\Models\User;
@@ -231,6 +232,12 @@ class VisitController extends Controller
         $user_visits = UserVisit::query()->where('fk_visit_id', '=', $visit->_id)->get();
 
         foreach($user_visits as $user_visit) {
+            $deleted = Garbage::new([
+                'table' => 'user_visits',
+                'deleted_id' => $user_visit->_id,
+            ]);
+            $deleted->save();
+
             UserVisit::find($user_visit->_id)->delete();
         }
 
@@ -265,11 +272,23 @@ class VisitController extends Controller
      */
     public function destroy($id)
     {
+        $deleted = Garbage::new([
+            'table' => 'visits',
+            'deleted_id' => $id,
+        ]);
+        $deleted->save();
+
         Visit::find($id)->delete();
 
         $user_visits = UserVisit::query()->where('fk_visit_id', '=', $id)->get();
 
         foreach ($user_visits as $user_visit) {
+            $deleted = Garbage::new([
+                'table' => 'user_visits',
+                'deleted_id' => $user_visit->_id,
+            ]);
+            $deleted->save();
+
             UserVisit::find($user_visit->_id)->delete();
         }
 

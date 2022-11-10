@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AgriculturalMachine;
+use App\Models\Garbage;
 use App\Models\Owner;
 use App\Models\Property;
 use App\Models\PropertyAgriculturalMachine;
@@ -267,12 +268,24 @@ class PropertyController extends Controller
         $property_vehicles = PropertyVehicle::query()->where('fk_property_id', '=', $property->_id)->get();
 
         foreach($property_vehicles as $property_vehicle) {
+            $deleted = Garbage::new([
+                'table' => 'property_vehicles',
+                'deleted_id' => $property_vehicle->_id,
+            ]);
+            $deleted->save();
+
             PropertyVehicle::find($property_vehicle->_id)->delete();
         }
 
         $property_agricultural_machines = PropertyAgriculturalMachine::query()->where('fk_property_id', '=', $property->_id)->get();
 
         foreach($property_agricultural_machines as $property_agricultural_machine) {
+            $deleted = Garbage::new([
+                'table' => 'property_agricultural_machines',
+                'deleted_id' => $property_agricultural_machine->_id,
+            ]);
+            $deleted->save();
+
             PropertyAgriculturalMachine::find($property_agricultural_machine->_id)->delete();
         }
 
@@ -312,6 +325,12 @@ class PropertyController extends Controller
      */
     public function destroy($id)
     {
+        $deleted = Garbage::new([
+            'table' => 'properties',
+            'deleted_id' => $id,
+        ]);
+        $deleted->save();
+
         Property::find($id)->delete();
 
         $property_vehicles = PropertyVehicle::query()->where('fk_property_id', '=', $id)->get();
@@ -320,19 +339,49 @@ class PropertyController extends Controller
         $visits = Visit::query()->where('fk_property_id', '=', $id)->get();
 
         foreach($property_vehicles as $property_vehicle) {
+            $deleted = Garbage::new([
+                'table' => 'property_vehicles',
+                'deleted_id' => $property_vehicle->_id,
+            ]);
+            $deleted->save();
+
             PropertyVehicle::find($property_vehicle->_id)->delete();
         }
         foreach($property_agricultural_machines as $property_agricultural_machine) {
+            $deleted = Garbage::new([
+                'table' => 'property_agricultural_machines',
+                'deleted_id' => $property_agricultural_machine->_id,
+            ]);
+            $deleted->save();
+
             PropertyAgriculturalMachine::find($property_agricultural_machine->_id)->delete();
         }
         foreach($requests as $request) {
+            $deleted = Garbage::new([
+                'table' => 'requests',
+                'deleted_id' => $request->_id,
+            ]);
+            $deleted->save();
+
             ModelsRequest::find($request->_id)->delete();
         }
         foreach($visits as $visit) {
             $user_visits = UserVisit::query()->where('fk_visit_id', '=', $visit->_id)->get();
             foreach ($user_visits as $user_visit) {
+                $deleted = Garbage::new([
+                    'table' => 'user_visits',
+                    'deleted_id' => $user_visit->_id,
+                ]);
+                $deleted->save();
+
                 UserVisit::find($user_visit->_id)->delete();
             }
+            $deleted = Garbage::new([
+                'table' => 'visits',
+                'deleted_id' => $visit->_id,
+            ]);
+            $deleted->save();
+
             Visit::find($visit->_id)->delete();
         }
 

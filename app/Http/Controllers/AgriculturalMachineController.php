@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AgriculturalMachine;
+use App\Models\Garbage;
 use App\Models\PropertyAgriculturalMachine;
 use Illuminate\Http\Request;
 
@@ -100,10 +101,22 @@ class AgriculturalMachineController extends Controller
      */
     public function destroy($id)
     {
+        $deleted = Garbage::new([
+            'table' => 'agricultural_machines',
+            'deleted_id' => $id,
+        ]);
+        $deleted->save();
+
         AgriculturalMachine::find($id)->delete();
 
         $property_agricultural_machines = PropertyAgriculturalMachine::query()->where('fk_agricultural_machine_id', '=', $id)->get();
         foreach($property_agricultural_machines as $property_agricultural_machine) {
+            $deleted = Garbage::new([
+                'table' => 'property_agricultural_machines',
+                'deleted_id' => $property_agricultural_machine->_id,
+            ]);
+            $deleted->save();
+
             PropertyAgriculturalMachine::find($property_agricultural_machine->_id)->delete();
         }
 

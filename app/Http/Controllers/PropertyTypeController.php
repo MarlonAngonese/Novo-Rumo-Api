@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Garbage;
 use App\Models\PropertyType;
 use Illuminate\Http\Request;
 
@@ -99,6 +100,12 @@ class PropertyTypeController extends Controller
      */
     public function destroy($id)
     {
+        $deleted = Garbage::new([
+            'table' => 'property_types',
+            'deleted_id' => $id,
+        ]);
+        $deleted->save();
+
         PropertyType::find($id)->delete();
 
         return response()->json([

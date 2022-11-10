@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Garbage;
 use App\Models\Property;
 use App\Models\User;
 use App\Models\UserVisit;
@@ -199,10 +200,22 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
+        $deleted = Garbage::new([
+            'table' => 'users',
+            'deleted_id' => $id,
+        ]);
+        $deleted->save();
+
         User::find($id)->delete();
 
         $user_visits = UserVisit::query()->where('fk_user_id', '=', $id)->id();
         foreach($user_visits as $user_visit) {
+            $deleted = Garbage::new([
+                'table' => 'user_visits',
+                'deleted_id' => $user_visit->_id,
+            ]);
+            $deleted->save();
+
             UserVisit::find($user_visit->_id)->delete();
         }
 

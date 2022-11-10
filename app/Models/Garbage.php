@@ -10,4 +10,5 @@ class Garbage extends Model
     use HasFactory;
 
     protected $dates = ['created_at', 'updated_at'];
+    public $fillable = ['table', 'deleted_id'];
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Garbage;
 use App\Models\PropertyVehicle;
 use App\Models\Vehicle;
 use Illuminate\Http\Request;
@@ -101,10 +102,22 @@ class VehicleController extends Controller
      */
     public function destroy($id)
     {
+        $deleted = Garbage::new([
+            'table' => 'vehicles',
+            'deleted_id' => $id,
+        ]);
+        $deleted->save();
+
         Vehicle::find($id)->delete();
 
         $property_vehicles = PropertyVehicle::query()->where('fk_vehicle_id', '=', $id)->get();
         foreach($property_vehicles as $property_vehicle) {
+            $deleted = Garbage::new([
+                'table' => 'property_vehicles',
+                'deleted_id' => $property_vehicle->_id,
+            ]);
+            $deleted->save();
+
             PropertyVehicle::find($property_vehicle->_id)->delete();
         }
 
