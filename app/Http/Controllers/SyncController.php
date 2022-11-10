@@ -205,6 +205,8 @@ class SyncController extends Controller {
                     $propertyData->observations = $property["observations"];
                     $propertyData->fk_owner_id = $property["fk_owner_id"];
                     $propertyData->fk_property_type_id = $property["fk_property_type_id"];
+                    $propertyData->latitude = $property["latitude"];
+                    $propertyData->longitude = $property["longitude"];
                     $propertyData->created_at = new Carbon($property["createdAt"]);
                     $propertyData->updated_at = new Carbon($property["updatedAt"]);
 
@@ -432,7 +434,7 @@ class SyncController extends Controller {
                     
                     $model_requestData->_id = new ObjectId($model_request["_id"]);
                     $model_requestData->agency = $model_request["agency"];
-                    $model_requestData->has_success = new $model_request["has_success"];
+                    $model_requestData->has_success = $model_request["has_success"];
                     $model_requestData->fk_property_id = $model_request["fk_property_id"];
                     $model_requestData->created_at = new Carbon($model_request["createdAt"]);
                     $model_requestData->updated_at = new Carbon($model_request["updatedAt"]);
