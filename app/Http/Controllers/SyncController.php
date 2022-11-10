@@ -481,6 +481,8 @@ class SyncController extends Controller {
                 $json = json_decode($request->getContent(), true);
                 $user_visits = $json['user_visits'];
 
+                return $user_visits;
+
                 foreach ($user_visits as $user_visit) {
                     $existingUser_visit = UserVisit::find($user_visit["_id"]);
 

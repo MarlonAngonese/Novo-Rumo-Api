@@ -162,7 +162,7 @@ class PropertyController extends Controller
         if ($vehicles = $request->input('vehicles')) {
             foreach ($vehicles as $vehicle) {
                 $property_vehicle = new PropertyVehicle([
-                    'fk_property_id' => $property->id,
+                    'fk_property_id' => $property->_id,
                     'fk_vehicle_id' => $vehicle["id"],
                     'color' => $vehicle["color"],
                 ]);
@@ -174,7 +174,7 @@ class PropertyController extends Controller
         if ($agricultural_machines = $request->input('agricultural_machines')) {
             foreach ($agricultural_machines as $agricultural_machine_id) {
                 $property_agricultural_machine = new PropertyAgriculturalMachine([
-                    'fk_property_id' => $property->id,
+                    'fk_property_id' => $property->_id,
                     'fk_agricultural_machine_id' => $agricultural_machine_id,
                 ]);
 
@@ -279,7 +279,7 @@ class PropertyController extends Controller
         if ($vehicles = $request->input('vehicles')) {
             foreach ($vehicles as $vehicle) {
                 $property_vehicle = new PropertyVehicle([
-                    'fk_property_id' => $property->id,
+                    'fk_property_id' => $property->_id,
                     'fk_vehicle_id' => $vehicle["id"],
                     'color' => $vehicle["color"],
                 ]);
@@ -291,7 +291,7 @@ class PropertyController extends Controller
         if ($agricultural_machines = $request->input('agricultural_machines')) {
             foreach ($agricultural_machines as $agricultural_machine_id) {
                 $property_agricultural_machine = new PropertyAgriculturalMachine([
-                    'fk_property_id' => $property->id,
+                    'fk_property_id' => $property->_id,
                     'fk_agricultural_machine_id' => $agricultural_machine_id,
                 ]);
 
