@@ -548,7 +548,7 @@ class SyncController extends Controller {
                     }
                     
                     $property_vehicleData->_id = new ObjectId($property_vehicle["_id"]);
-                    $property_vehicleData->fk_visit_id = $property_vehicle["fk_visit_id"];
+                    $property_vehicleData->fk_vehicle_id = $property_vehicle["fk_vehicle_id"];
                     $property_vehicleData->fk_user_id = $property_vehicle["fk_user_id"];
                     $property_vehicleData->created_at = new Carbon($property_vehicle["createdAt"]);
                     $property_vehicleData->updated_at = new Carbon($property_vehicle["updatedAt"]);
@@ -605,7 +605,7 @@ class SyncController extends Controller {
                     }
                     
                     $property_agricultural_machineData->_id = new ObjectId($property_agricultural_machine["_id"]);
-                    $property_agricultural_machineData->fk_visit_id = $property_agricultural_machine["fk_visit_id"];
+                    $property_agricultural_machineData->fk_agricultural_machine_id = $property_agricultural_machine["fk_agricultural_machine_id"];
                     $property_agricultural_machineData->fk_user_id = $property_agricultural_machine["fk_user_id"];
                     $property_agricultural_machineData->created_at = new Carbon($property_agricultural_machine["createdAt"]);
                     $property_agricultural_machineData->updated_at = new Carbon($property_agricultural_machine["updatedAt"]);
