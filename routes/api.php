@@ -87,4 +87,5 @@ Route::group(['middleware' => ['apiJwt']], function () {
     Route::any('sync/property-types', [SyncController::class, 'syncPropertyTypes']);
     Route::any('sync/properties', [SyncController::class, 'syncProperties']);
     Route::any('sync/vehicles', [SyncController::class, 'syncVehicles']);
+    Route::any('sync/agricultural-machines', [SyncController::class, 'syncAgriculturalMachines']);
 });

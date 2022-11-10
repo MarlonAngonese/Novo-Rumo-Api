@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AgriculturalMachine;
 use App\Models\Garbage;
 use App\Models\Owner;
 use App\Models\Property;
@@ -298,6 +299,62 @@ class SyncController extends Controller {
     
             // If there isn't any last_date param, return all data
             return response()->json(Vehicle::query()->get());
+        } catch (Exception $e) {
+            return response()->json([ 'error' => strval($e) ], 500);
+        }
+    }
+
+    /**
+     * Send AgriculturalMachine data
+     * 
+     * @param Request $request request data
+     */
+    public function syncAgriculturalMachines(Request $request) {
+
+        try {
+            if ($request->method() == "POST") {
+                
+                $json = json_decode($request->getContent(), true);
+                $agricultural_machines = $json['agricultural_machines'];
+
+                foreach ($agricultural_machines as $agricultural_machine) {
+                    $existingAgriculturalMachine = AgriculturalMachine::find($agricultural_machine["_id"]);
+
+                    if (!$existingAgriculturalMachine) {
+                        $agricultural_machineData = new AgriculturalMachine();
+                    } else {
+                        $agricultural_machineData = $existingAgriculturalMachine;
+                    }
+                    
+                    $agricultural_machineData->_id = new ObjectId($agricultural_machine["_id"]);
+                    $agricultural_machineData->name = $agricultural_machine["name"];
+                    $agricultural_machineData->created_at = new Carbon($agricultural_machine["createdAt"]);
+                    $agricultural_machineData->updated_at = new Carbon($agricultural_machine["updatedAt"]);
+
+                    $agricultural_machineData->save();
+                }
+
+                return response()->json([
+                    'updated' => true,
+                ], 201);
+            }
+    
+            // Check for last_date request param
+            if (isset($request["last_date"])) {
+                $last_date = date('Y-m-d H:i:s', strtotime($request["last_date"]));
+                $agricultural_machineQuery = AgriculturalMachine::query()->where('updated_at', '>', new DateTime($last_date));
+    
+                $deletedQuery = Garbage::query()->where('table', '=', 'agricultural_machines')->where('updated_at', '>', new DateTime($last_date));
+                return response()->json(
+                    [
+                        'agricultural_machines' => $agricultural_machineQuery->get(),
+                        'deleted' => $deletedQuery->get(),
+                    ]
+                );
+            }
+    
+            // If there isn't any last_date param, return all data
+            return response()->json(AgriculturalMachine::query()->get());
         } catch (Exception $e) {
             return response()->json([ 'error' => strval($e) ], 500);
         }
