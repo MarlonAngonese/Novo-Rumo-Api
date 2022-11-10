@@ -6,9 +6,14 @@ use App\Models\AgriculturalMachine;
 use App\Models\Garbage;
 use App\Models\Owner;
 use App\Models\Property;
+use App\Models\PropertyAgriculturalMachine;
 use App\Models\PropertyType;
+use App\Models\PropertyVehicle;
+use App\Models\Request as ModelsRequest;
 use App\Models\User;
+use App\Models\UserVisit;
 use App\Models\Vehicle;
+use App\Models\Visit;
 use Carbon\Carbon;
 use DateTime;
 use Exception;
@@ -107,6 +112,9 @@ class SyncController extends Controller {
                     $ownerData->_id = new ObjectId($owner["_id"]);
                     $ownerData->firstname = $owner["firstname"];
                     $ownerData->lastname = $owner["lastname"];
+                    $ownerData->cpf = $owner["cpf"];
+                    $ownerData->phone1 = $owner["phone1"];
+                    $ownerData->phone2 = $owner["phone2"];
                     $ownerData->created_at = new Carbon($owner["createdAt"]);
                     $ownerData->updated_at = new Carbon($owner["updatedAt"]);
 
@@ -355,6 +363,323 @@ class SyncController extends Controller {
     
             // If there isn't any last_date param, return all data
             return response()->json(AgriculturalMachine::query()->get());
+        } catch (Exception $e) {
+            return response()->json([ 'error' => strval($e) ], 500);
+        }
+    }
+
+    /**
+     * Send Visits data
+     * 
+     * @param Request $request request data
+     */
+    public function syncVisits(Request $request) {
+
+        try {
+            if ($request->method() == "POST") {
+                
+                $json = json_decode($request->getContent(), true);
+                $visits = $json['visits'];
+                $visitsDeleted = $json['deleted'];
+
+                foreach ($visits as $visit) {
+                    $existingVisit = Visit::find($visit["_id"]);
+
+                    if (!$existingVisit) { // New Visit
+                        $visitData = new Visit;
+                    } else { // Visit exists
+                        $visitData = $existingVisit;
+                    }
+                    
+                    $visitData->_id = new ObjectId($visit["_id"]);
+                    $visitData->car = $visit["car"];
+                    $visitData->date = new Carbon($visit["date"]);
+                    $visitData->fk_property_id = $visit["fk_property_id"];
+                    $visitData->created_at = new Carbon($visit["createdAt"]);
+                    $visitData->updated_at = new Carbon($visit["updatedAt"]);
+
+                    $visitData->save();
+                }
+
+                foreach ($visitsDeleted as $uD) {
+                    $visitDeleted = Visit::find($uD);
+                    $visitDeleted->delete();
+                }
+
+                return response()->json([
+                    'updated' => true,
+                ], 201);
+            }
+    
+            // Check for last_date request param
+            if (isset($request["last_date"])) {
+                $last_date = date('Y-m-d H:i:s', strtotime($request["last_date"]));
+                $visitQuery = Visit::query()->where('updated_at', '>', new DateTime($last_date));
+    
+                $deletedQuery = Garbage::query()->where('table', '=', 'visits')->where('updated_at', '>', new DateTime($last_date));
+                return response()->json(
+                    [
+                        'visits' => $visitQuery->get(),
+                        'deleted' => $deletedQuery->get(),
+                    ]
+                );
+            }
+    
+            // If there isn't any last_date param, return all data
+            return response()->json(Visit::query()->get());
+        } catch (Exception $e) {
+            return response()->json([ 'error' => strval($e) ], 500);
+        }
+    }
+
+    /**
+     * Send Request data
+     * 
+     * @param Request $request request data
+     */
+    public function syncRequests(Request $request) {
+
+        try {
+            if ($request->method() == "POST") {
+                
+                $json = json_decode($request->getContent(), true);
+                $model_requests = $json['requests'];
+                $model_requestsDeleted = $json['deleted'];
+
+                foreach ($model_requests as $model_request) {
+                    $existingModelRequest = ModelsRequest::find($model_request["_id"]);
+
+                    if (!$existingModelRequest) { // New Request
+                        $model_requestData = new ModelsRequest;
+                    } else { // Request exists
+                        $model_requestData = $existingModelRequest;
+                    }
+                    
+                    $model_requestData->_id = new ObjectId($model_request["_id"]);
+                    $model_requestData->agency = $model_request["agency"];
+                    $model_requestData->has_success = new $model_request["has_success"];
+                    $model_requestData->fk_property_id = $model_request["fk_property_id"];
+                    $model_requestData->created_at = new Carbon($model_request["createdAt"]);
+                    $model_requestData->updated_at = new Carbon($model_request["updatedAt"]);
+
+                    $model_requestData->save();
+                }
+
+                foreach ($model_requestsDeleted as $uD) {
+                    $model_requestDeleted = ModelsRequest::find($uD);
+                    $model_requestDeleted->delete();
+                }
+
+                return response()->json([
+                    'updated' => true,
+                ], 201);
+            }
+    
+            // Check for last_date request param
+            if (isset($request["last_date"])) {
+                $last_date = date('Y-m-d H:i:s', strtotime($request["last_date"]));
+                $model_requestQuery = ModelsRequest::query()->where('updated_at', '>', new DateTime($last_date));
+    
+                $deletedQuery = Garbage::query()->where('table', '=', 'requests')->where('updated_at', '>', new DateTime($last_date));
+                return response()->json(
+                    [
+                        'requests' => $model_requestQuery->get(),
+                        'deleted' => $deletedQuery->get(),
+                    ]
+                );
+            }
+    
+            // If there isn't any last_date param, return all data
+            return response()->json(ModelsRequest::query()->get());
+        } catch (Exception $e) {
+            return response()->json([ 'error' => strval($e) ], 500);
+        }
+    }
+
+    /**
+     * Send UserVisits data
+     * 
+     * @param Request $request request data
+     */
+    public function syncUserVisits(Request $request) {
+
+        try {
+            if ($request->method() == "POST") {
+                
+                $json = json_decode($request->getContent(), true);
+                $user_visits = $json['user_visits'];
+                $user_visitsDeleted = $json['deleted'];
+
+                foreach ($user_visits as $user_visit) {
+                    $existingUser_visit = UserVisit::find($user_visit["_id"]);
+
+                    if (!$existingUser_visit) { // New User_visit
+                        $user_visitData = new UserVisit;
+                    } else { // User_visit exists
+                        $user_visitData = $existingUser_visit;
+                    }
+                    
+                    $user_visitData->_id = new ObjectId($user_visit["_id"]);
+                    $user_visitData->fk_visit_id = $user_visit["fk_visit_id"];
+                    $user_visitData->fk_user_id = $user_visit["fk_user_id"];
+                    $user_visitData->created_at = new Carbon($user_visit["createdAt"]);
+                    $user_visitData->updated_at = new Carbon($user_visit["updatedAt"]);
+
+                    $user_visitData->save();
+                }
+
+                foreach ($user_visitsDeleted as $uD) {
+                    $user_visitDeleted = UserVisit::find($uD);
+                    $user_visitDeleted->delete();
+                }
+
+                return response()->json([
+                    'updated' => true,
+                ], 201);
+            }
+    
+            // Check for last_date request param
+            if (isset($request["last_date"])) {
+                $last_date = date('Y-m-d H:i:s', strtotime($request["last_date"]));
+                $user_visitQuery = UserVisit::query()->where('updated_at', '>', new DateTime($last_date));
+    
+                $deletedQuery = Garbage::query()->where('table', '=', 'user_visits')->where('updated_at', '>', new DateTime($last_date));
+                return response()->json(
+                    [
+                        'user_visits' => $user_visitQuery->get(),
+                        'deleted' => $deletedQuery->get(),
+                    ]
+                );
+            }
+    
+            // If there isn't any last_date param, return all data
+            return response()->json(UserVisit::query()->get());
+        } catch (Exception $e) {
+            return response()->json([ 'error' => strval($e) ], 500);
+        }
+    }
+
+    /**
+     * Send PropertyVehicles data
+     * 
+     * @param Request $request request data
+     */
+    public function syncPropertyVehicles(Request $request) {
+
+        try {
+            if ($request->method() == "POST") {
+                
+                $json = json_decode($request->getContent(), true);
+                $property_vehicles = $json['property_vehicles'];
+                $property_vehiclesDeleted = $json['deleted'];
+
+                foreach ($property_vehicles as $property_vehicle) {
+                    $existingProperty_vehicle = PropertyVehicle::find($property_vehicle["_id"]);
+
+                    if (!$existingProperty_vehicle) { // New Property_vehicle
+                        $property_vehicleData = new PropertyVehicle;
+                    } else { // Property_vehicle exists
+                        $property_vehicleData = $existingProperty_vehicle;
+                    }
+                    
+                    $property_vehicleData->_id = new ObjectId($property_vehicle["_id"]);
+                    $property_vehicleData->fk_visit_id = $property_vehicle["fk_visit_id"];
+                    $property_vehicleData->fk_user_id = $property_vehicle["fk_user_id"];
+                    $property_vehicleData->created_at = new Carbon($property_vehicle["createdAt"]);
+                    $property_vehicleData->updated_at = new Carbon($property_vehicle["updatedAt"]);
+
+                    $property_vehicleData->save();
+                }
+
+                foreach ($property_vehiclesDeleted as $uD) {
+                    $property_vehicleDeleted = PropertyVehicle::find($uD);
+                    $property_vehicleDeleted->delete();
+                }
+
+                return response()->json([
+                    'updated' => true,
+                ], 201);
+            }
+    
+            // Check for last_date request param
+            if (isset($request["last_date"])) {
+                $last_date = date('Y-m-d H:i:s', strtotime($request["last_date"]));
+                $property_vehicleQuery = PropertyVehicle::query()->where('updated_at', '>', new DateTime($last_date));
+    
+                $deletedQuery = Garbage::query()->where('table', '=', 'property_vehicles')->where('updated_at', '>', new DateTime($last_date));
+                return response()->json(
+                    [
+                        'property_vehicles' => $property_vehicleQuery->get(),
+                        'deleted' => $deletedQuery->get(),
+                    ]
+                );
+            }
+    
+            // If there isn't any last_date param, return all data
+            return response()->json(PropertyVehicle::query()->get());
+        } catch (Exception $e) {
+            return response()->json([ 'error' => strval($e) ], 500);
+        }
+    }
+
+    /**
+     * Send PropertyAgriculturalMachinesdata
+     * 
+     * @param Request $request request data
+     */
+    public function syncPropertyAgriculturalMachines(Request $request) {
+
+        try {
+            if ($request->method() == "POST") {
+                
+                $json = json_decode($request->getContent(), true);
+                $property_agricultural_machines = $json['property_agricultural_machines'];
+                $property_agricultural_machinesDeleted = $json['deleted'];
+
+                foreach ($property_agricultural_machines as $property_agricultural_machine) {
+                    $existingProperty_agricultural_machine = PropertyAgriculturalMachine::find($property_agricultural_machine["_id"]);
+
+                    if (!$existingProperty_agricultural_machine) { // New Property_agricultural_machine
+                        $property_agricultural_machineData = new PropertyAgriculturalMachine;
+                    } else { // Property_agricultural_machine exists
+                        $property_agricultural_machineData = $existingProperty_agricultural_machine;
+                    }
+                    
+                    $property_agricultural_machineData->_id = new ObjectId($property_agricultural_machine["_id"]);
+                    $property_agricultural_machineData->fk_visit_id = $property_agricultural_machine["fk_visit_id"];
+                    $property_agricultural_machineData->fk_user_id = $property_agricultural_machine["fk_user_id"];
+                    $property_agricultural_machineData->created_at = new Carbon($property_agricultural_machine["createdAt"]);
+                    $property_agricultural_machineData->updated_at = new Carbon($property_agricultural_machine["updatedAt"]);
+
+                    $property_agricultural_machineData->save();
+                }
+
+                foreach ($property_agricultural_machinesDeleted as $uD) {
+                    $property_agricultural_machineDeleted = PropertyAgriculturalMachine::find($uD);
+                    $property_agricultural_machineDeleted->delete();
+                }
+
+                return response()->json([
+                    'updated' => true,
+                ], 201);
+            }
+    
+            // Check for last_date request param
+            if (isset($request["last_date"])) {
+                $last_date = date('Y-m-d H:i:s', strtotime($request["last_date"]));
+                $property_agricultural_machineQuery = PropertyAgriculturalMachine::query()->where('updated_at', '>', new DateTime($last_date));
+    
+                $deletedQuery = Garbage::query()->where('table', '=', 'property_agricultural_machines')->where('updated_at', '>', new DateTime($last_date));
+                return response()->json(
+                    [
+                        'property_agricultural_machines' => $property_agricultural_machineQuery->get(),
+                        'deleted' => $deletedQuery->get(),
+                    ]
+                );
+            }
+    
+            // If there isn't any last_date param, return all data
+            return response()->json(PropertyAgriculturalMachine::query()->get());
         } catch (Exception $e) {
             return response()->json([ 'error' => strval($e) ], 500);
         }

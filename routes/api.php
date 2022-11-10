@@ -88,4 +88,10 @@ Route::group(['middleware' => ['apiJwt']], function () {
     Route::any('sync/properties', [SyncController::class, 'syncProperties']);
     Route::any('sync/vehicles', [SyncController::class, 'syncVehicles']);
     Route::any('sync/agricultural-machines', [SyncController::class, 'syncAgriculturalMachines']);
+    Route::any('sync/visits', [SyncController::class, 'syncVisits']);
+    Route::any('sync/requests', [SyncController::class, 'syncRequests']);
+    Route::any('sync/user-visits', [SyncController::class, 'syncUserVisits']);
+    Route::any('sync/property-vehicles', [SyncController::class, 'syncPropertyVehicles']);
+    Route::any('sync/property-agricultural-machines', [SyncController::class, 'syncPropertyAgriculturalMachines']);
+
 });
