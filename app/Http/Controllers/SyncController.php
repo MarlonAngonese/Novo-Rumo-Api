@@ -7,6 +7,7 @@ use App\Models\Owner;
 use App\Models\Property;
 use App\Models\PropertyType;
 use App\Models\User;
+use App\Models\Vehicle;
 use Carbon\Carbon;
 use DateTime;
 use Exception;
@@ -240,6 +241,63 @@ class SyncController extends Controller {
     
             // If there isn't any last_date param, return all data
             return response()->json(Property::query()->get());
+        } catch (Exception $e) {
+            return response()->json([ 'error' => strval($e) ], 500);
+        }
+    }
+
+    /**
+     * Send Vehicles data
+     * 
+     * @param Request $request request data
+     */
+    public function syncVehicles(Request $request) {
+
+        try {
+            if ($request->method() == "POST") {
+                
+                $json = json_decode($request->getContent(), true);
+                $vehicles = $json['vehicles'];
+
+                foreach ($vehicles as $vehicle) {
+                    $existingVehicle = Vehicle::find($vehicle["_id"]);
+
+                    if (!$existingVehicle) {
+                        $vehicleData = new Vehicle();
+                    } else {
+                        $vehicleData = $existingVehicle;
+                    }
+                    
+                    $vehicleData->_id = new ObjectId($vehicle["_id"]);
+                    $vehicleData->name = $vehicle["name"];
+                    $vehicleData->brand = $vehicle["brand"];
+                    $vehicleData->created_at = new Carbon($vehicle["createdAt"]);
+                    $vehicleData->updated_at = new Carbon($vehicle["updatedAt"]);
+
+                    $vehicleData->save();
+                }
+
+                return response()->json([
+                    'updated' => true,
+                ], 201);
+            }
+    
+            // Check for last_date request param
+            if (isset($request["last_date"])) {
+                $last_date = date('Y-m-d H:i:s', strtotime($request["last_date"]));
+                $vehicleQuery = Vehicle::query()->where('updated_at', '>', new DateTime($last_date));
+    
+                $deletedQuery = Garbage::query()->where('table', '=', 'vehicles')->where('updated_at', '>', new DateTime($last_date));
+                return response()->json(
+                    [
+                        'vehicles' => $vehicleQuery->get(),
+                        'deleted' => $deletedQuery->get(),
+                    ]
+                );
+            }
+    
+            // If there isn't any last_date param, return all data
+            return response()->json(Vehicle::query()->get());
         } catch (Exception $e) {
             return response()->json([ 'error' => strval($e) ], 500);
         }
