@@ -111,7 +111,7 @@ class OwnerController extends Controller
      */
     public function destroy($id)
     {
-        $deleted = Garbage::new([
+        $deleted = new Garbage([
             'table' => 'owners',
             'deleted_id' => $id,
         ]);
@@ -127,7 +127,7 @@ class OwnerController extends Controller
             $visits = Visit::query()->where('fk_property_id', '=', $property->_id)->get();
 
             foreach($property_vehicles as $property_vehicle) {
-                $deleted = Garbage::new([
+                $deleted = new Garbage([
                     'table' => 'property_vehicles',
                     'deleted_id' => $property_vehicle->_id,
                 ]);
@@ -136,7 +136,7 @@ class OwnerController extends Controller
                 PropertyVehicle::find($property_vehicle->_id)->delete();
             }
             foreach($property_agricultural_machines as $property_agricultural_machine) {
-                $deleted = Garbage::new([
+                $deleted = new Garbage([
                     'table' => 'property_agricultural_machines',
                     'deleted_id' => $property_agricultural_machine->_id,
                 ]);
@@ -145,7 +145,7 @@ class OwnerController extends Controller
                 PropertyAgriculturalMachine::find($property_agricultural_machine->_id)->delete();
             }
             foreach($requests as $request) {
-                $deleted = Garbage::new([
+                $deleted = new Garbage([
                     'table' => 'requests',
                     'deleted_id' => $request->_id,
                 ]);
@@ -156,7 +156,7 @@ class OwnerController extends Controller
             foreach($visits as $visit) {
                 $user_visits = UserVisit::query()->where('fk_visit_id', '=', $visit->_id)->get();
                 foreach ($user_visits as $user_visit) {
-                    $deleted = Garbage::new([
+                    $deleted = new Garbage([
                         'table' => 'user_visits',
                         'deleted_id' => $user_visit->_id,
                     ]);
@@ -164,7 +164,7 @@ class OwnerController extends Controller
 
                     UserVisit::find($user_visit->_id)->delete();
                 }
-                $deleted = Garbage::new([
+                $deleted = new Garbage([
                     'table' => 'visits',
                     'deleted_id' => $visit->_id,
                 ]);
@@ -172,7 +172,7 @@ class OwnerController extends Controller
 
                 Visit::find($visit->_id)->delete();
             }
-            $deleted = Garbage::new([
+            $deleted = new Garbage([
                 'table' => 'properties',
                 'deleted_id' => $property->_id,
             ]);

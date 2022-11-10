@@ -232,7 +232,7 @@ class VisitController extends Controller
         $user_visits = UserVisit::query()->where('fk_visit_id', '=', $visit->_id)->get();
 
         foreach($user_visits as $user_visit) {
-            $deleted = Garbage::new([
+            $deleted = new Garbage([
                 'table' => 'user_visits',
                 'deleted_id' => $user_visit->_id,
             ]);
@@ -272,7 +272,7 @@ class VisitController extends Controller
      */
     public function destroy($id)
     {
-        $deleted = Garbage::new([
+        $deleted = new Garbage([
             'table' => 'visits',
             'deleted_id' => $id,
         ]);
@@ -283,7 +283,7 @@ class VisitController extends Controller
         $user_visits = UserVisit::query()->where('fk_visit_id', '=', $id)->get();
 
         foreach ($user_visits as $user_visit) {
-            $deleted = Garbage::new([
+            $deleted = new Garbage([
                 'table' => 'user_visits',
                 'deleted_id' => $user_visit->_id,
             ]);

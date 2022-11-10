@@ -200,7 +200,7 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-        $deleted = Garbage::new([
+        $deleted = new Garbage([
             'table' => 'users',
             'deleted_id' => $id,
         ]);
@@ -210,7 +210,7 @@ class UserController extends Controller
 
         $user_visits = UserVisit::query()->where('fk_user_id', '=', $id)->id();
         foreach($user_visits as $user_visit) {
-            $deleted = Garbage::new([
+            $deleted = new Garbage([
                 'table' => 'user_visits',
                 'deleted_id' => $user_visit->_id,
             ]);

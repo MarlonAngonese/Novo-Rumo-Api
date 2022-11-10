@@ -100,7 +100,7 @@ class PropertyTypeController extends Controller
      */
     public function destroy($id)
     {
-        $deleted = Garbage::new([
+        $deleted = new Garbage([
             'table' => 'property_types',
             'deleted_id' => $id,
         ]);

@@ -101,7 +101,7 @@ class AgriculturalMachineController extends Controller
      */
     public function destroy($id)
     {
-        $deleted = Garbage::new([
+        $deleted = new Garbage([
             'table' => 'agricultural_machines',
             'deleted_id' => $id,
         ]);
@@ -111,7 +111,7 @@ class AgriculturalMachineController extends Controller
 
         $property_agricultural_machines = PropertyAgriculturalMachine::query()->where('fk_agricultural_machine_id', '=', $id)->get();
         foreach($property_agricultural_machines as $property_agricultural_machine) {
-            $deleted = Garbage::new([
+            $deleted = new Garbage([
                 'table' => 'property_agricultural_machines',
                 'deleted_id' => $property_agricultural_machine->_id,
             ]);

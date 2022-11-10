@@ -102,7 +102,7 @@ class VehicleController extends Controller
      */
     public function destroy($id)
     {
-        $deleted = Garbage::new([
+        $deleted = new Garbage([
             'table' => 'vehicles',
             'deleted_id' => $id,
         ]);
@@ -112,7 +112,7 @@ class VehicleController extends Controller
 
         $property_vehicles = PropertyVehicle::query()->where('fk_vehicle_id', '=', $id)->get();
         foreach($property_vehicles as $property_vehicle) {
-            $deleted = Garbage::new([
+            $deleted = new Garbage([
                 'table' => 'property_vehicles',
                 'deleted_id' => $property_vehicle->_id,
             ]);
