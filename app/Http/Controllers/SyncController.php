@@ -34,7 +34,6 @@ class SyncController extends Controller {
                 
                 $json = json_decode($request->getContent(), true);
                 $users = $json['users'];
-                $usersDeleted = $json['deleted'];
 
                 foreach ($users as $user) {
                     $existingUser = User::find($user["_id"]);
@@ -53,11 +52,6 @@ class SyncController extends Controller {
                     $userData->updated_at = new Carbon($user["updatedAt"]);
 
                     $userData->save();
-                }
-
-                foreach ($usersDeleted as $uD) {
-                    $userDeleted = User::find($uD);
-                    $userDeleted->delete();
                 }
 
                 return response()->json([
@@ -98,7 +92,6 @@ class SyncController extends Controller {
                 
                 $json = json_decode($request->getContent(), true);
                 $owners = $json['owners'];
-                $ownersDeleted = $json['deleted'];
 
                 foreach ($owners as $owner) {
                     $existingOwner = Owner::find($owner["_id"]);
@@ -119,11 +112,6 @@ class SyncController extends Controller {
                     $ownerData->updated_at = new Carbon($owner["updatedAt"]);
 
                     $ownerData->save();
-                }
-
-                foreach ($ownersDeleted as $oD) {
-                    $ownersDeleted = Owner::find($oD);
-                    $ownersDeleted->delete();
                 }
 
                 return response()->json([
@@ -193,7 +181,6 @@ class SyncController extends Controller {
                 
                 $json = json_decode($request->getContent(), true);
                 $properties = $json['properties'];
-                $propertiesDeleted = $json['deleted'];
 
                 foreach ($properties as $property) {
                     $existingProperty = Property::find($property["_id"]);
@@ -222,11 +209,6 @@ class SyncController extends Controller {
                     $propertyData->updated_at = new Carbon($property["updatedAt"]);
 
                     $propertyData->save();
-                }
-
-                foreach ($propertiesDeleted as $uD) {
-                    $propertyDeleted = Property::find($uD);
-                    $propertyDeleted->delete();
                 }
 
                 return response()->json([
@@ -380,7 +362,6 @@ class SyncController extends Controller {
                 
                 $json = json_decode($request->getContent(), true);
                 $visits = $json['visits'];
-                $visitsDeleted = $json['deleted'];
 
                 foreach ($visits as $visit) {
                     $existingVisit = Visit::find($visit["_id"]);
@@ -399,11 +380,6 @@ class SyncController extends Controller {
                     $visitData->updated_at = new Carbon($visit["updatedAt"]);
 
                     $visitData->save();
-                }
-
-                foreach ($visitsDeleted as $uD) {
-                    $visitDeleted = Visit::find($uD);
-                    $visitDeleted->delete();
                 }
 
                 return response()->json([
@@ -444,7 +420,6 @@ class SyncController extends Controller {
                 
                 $json = json_decode($request->getContent(), true);
                 $model_requests = $json['requests'];
-                $model_requestsDeleted = $json['deleted'];
 
                 foreach ($model_requests as $model_request) {
                     $existingModelRequest = ModelsRequest::find($model_request["_id"]);
@@ -463,11 +438,6 @@ class SyncController extends Controller {
                     $model_requestData->updated_at = new Carbon($model_request["updatedAt"]);
 
                     $model_requestData->save();
-                }
-
-                foreach ($model_requestsDeleted as $uD) {
-                    $model_requestDeleted = ModelsRequest::find($uD);
-                    $model_requestDeleted->delete();
                 }
 
                 return response()->json([
@@ -508,7 +478,6 @@ class SyncController extends Controller {
                 
                 $json = json_decode($request->getContent(), true);
                 $user_visits = $json['user_visits'];
-                $user_visitsDeleted = $json['deleted'];
 
                 foreach ($user_visits as $user_visit) {
                     $existingUser_visit = UserVisit::find($user_visit["_id"]);
@@ -526,11 +495,6 @@ class SyncController extends Controller {
                     $user_visitData->updated_at = new Carbon($user_visit["updatedAt"]);
 
                     $user_visitData->save();
-                }
-
-                foreach ($user_visitsDeleted as $uD) {
-                    $user_visitDeleted = UserVisit::find($uD);
-                    $user_visitDeleted->delete();
                 }
 
                 return response()->json([
@@ -571,7 +535,6 @@ class SyncController extends Controller {
                 
                 $json = json_decode($request->getContent(), true);
                 $property_vehicles = $json['property_vehicles'];
-                $property_vehiclesDeleted = $json['deleted'];
 
                 foreach ($property_vehicles as $property_vehicle) {
                     $existingProperty_vehicle = PropertyVehicle::find($property_vehicle["_id"]);
@@ -589,11 +552,6 @@ class SyncController extends Controller {
                     $property_vehicleData->updated_at = new Carbon($property_vehicle["updatedAt"]);
 
                     $property_vehicleData->save();
-                }
-
-                foreach ($property_vehiclesDeleted as $uD) {
-                    $property_vehicleDeleted = PropertyVehicle::find($uD);
-                    $property_vehicleDeleted->delete();
                 }
 
                 return response()->json([
@@ -634,7 +592,6 @@ class SyncController extends Controller {
                 
                 $json = json_decode($request->getContent(), true);
                 $property_agricultural_machines = $json['property_agricultural_machines'];
-                $property_agricultural_machinesDeleted = $json['deleted'];
 
                 foreach ($property_agricultural_machines as $property_agricultural_machine) {
                     $existingProperty_agricultural_machine = PropertyAgriculturalMachine::find($property_agricultural_machine["_id"]);
@@ -652,11 +609,6 @@ class SyncController extends Controller {
                     $property_agricultural_machineData->updated_at = new Carbon($property_agricultural_machine["updatedAt"]);
 
                     $property_agricultural_machineData->save();
-                }
-
-                foreach ($property_agricultural_machinesDeleted as $uD) {
-                    $property_agricultural_machineDeleted = PropertyAgriculturalMachine::find($uD);
-                    $property_agricultural_machineDeleted->delete();
                 }
 
                 return response()->json([
