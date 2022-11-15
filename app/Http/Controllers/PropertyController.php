@@ -81,11 +81,8 @@ class PropertyController extends Controller
         $page = $request->input('page', 1);
         $total = $properties->count();
 
-        $properties = $properties->offset(($page - 1) * $elementsPerPage)->limit($elementsPerPage)->get(["_id", "code"]);
+        $properties = $properties->offset(($page - 1) * $elementsPerPage)->limit($elementsPerPage)->get(["_id", "code", "fk_owner_id"]);
 
-        $vehicles = [];
-        $agricultural_machines = [];
-        $visits = [];
         foreach ($properties as $property_key => $property) {
             // List Owner
             $owner = Owner::query()->where('_id', '=', $property->fk_owner_id)->get(["_id", "firstname", "lastname"])->first();
