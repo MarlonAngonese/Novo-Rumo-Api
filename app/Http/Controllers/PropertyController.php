@@ -202,8 +202,17 @@ class PropertyController extends Controller
         }
         $property->visits = $visits;
 
+        $owners = Owner::query()->get(["_id", "firstname", "lastname"]);
+        $property_types = PropertyType::query()->get(["_id", "name"]);
+        $agricultural_machines = AgriculturalMachine::query()->get(["_id", "name"]);
+        $vehicles = Vehicle::query()->get(["_id", "name", "brand"]);
+
         return response()->json([
             'property' => $property,
+            'owners' => $owners,
+            'agricultural_machines' => $agricultural_machines,
+            'vehicles' => $vehicles,
+            'property_types' => $property_types,
         ], 200);
     }
 
