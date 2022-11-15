@@ -89,8 +89,12 @@ class PropertyController extends Controller
             $properties[$property_key]->owner = $owner;
         }
 
+        // Get owner list names
+        $all_owners = Owner::query()->get(["_id", "firstname", "lastname"]);
+
         return [
             'properties' => $properties,
+            'all_owners' => $all_owners,
             'total' => $total,
             'page' => $page,
             'last_page' => ceil($total / $elementsPerPage)
