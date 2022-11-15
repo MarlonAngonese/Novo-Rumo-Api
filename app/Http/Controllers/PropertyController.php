@@ -81,58 +81,15 @@ class PropertyController extends Controller
         $page = $request->input('page', 1);
         $total = $properties->count();
 
-        $properties = $properties->offset(($page - 1) * $elementsPerPage)->limit($elementsPerPage)->get();
+        $properties = $properties->offset(($page - 1) * $elementsPerPage)->limit($elementsPerPage)->get(["_id", "code"]);
 
         $vehicles = [];
         $agricultural_machines = [];
         $visits = [];
         foreach ($properties as $property_key => $property) {
             // List Owner
-            $owner = Owner::query()->where('_id', '=', $property->fk_owner_id)->first();
+            $owner = Owner::query()->where('_id', '=', $property->fk_owner_id)->get(["_id", "firstname", "lastname"])->first();
             $properties[$property_key]->owner = $owner;
-
-            // List Property Type
-            $property_type = PropertyType::query()->where('_id', '=', $property->fk_property_type_id)->first();
-            $properties[$property_key]->property_type = $property_type;
-
-            // List Property Vehicles
-            $property_vehicles = PropertyVehicle::query()->where('fk_property_id', '=', $property->_id)->get();
-            foreach($property_vehicles as $property_vehicle) {
-                $vehicle = Vehicle::query()->where('_id', '=', $property_vehicle->fk_vehicle_id)->first();
-                $vehicle->color = $property_vehicle->color;
-                array_push($vehicles, $vehicle);
-            }
-            $properties[$property_key]->vehicles = $vehicles;
-            $vehicles = [];
-
-            // List Agricultural Machines
-            $property_agricultural_machines = PropertyAgriculturalMachine::query()->where('fk_property_id', '=', $property->_id)->get();
-            foreach($property_agricultural_machines as $property_agricultural_machine) {
-                $agricultural_machine = AgriculturalMachine::query()->where('_id', '=', $property_agricultural_machine->fk_agricultural_machine_id)->first();
-                array_push($agricultural_machines, $agricultural_machine);
-            }
-            $properties[$property_key]->agricultural_machines = $agricultural_machines;
-            $agricultural_machines = [];
-
-            // List Requests
-            $model_requests = ModelsRequest::query()->where('fk_property_id', '=', $property->_id)->get();
-            $properties[$property_key]->requests = $model_requests;
-
-            // List Property Visits
-            $property_visits = Visit::query()->where('fk_property_id', '=', $property->_id)->get();
-            foreach($property_visits as $property_visit) {
-                $user_visits = UserVisit::query()->where('fk_visit_id', $property_visit->_id)->get();
-                $users = [];
-                foreach ($user_visits as $user_visit) {
-                    $user = User::query()->where('_id', '=', $user_visit->fk_user_id)->get();
-                    array_push($users, $user);
-                }
-                $property_visit->users = $users;
-                array_push($visits, $property_visit);
-            }
-
-            $properties[$property_key]->visits = $visits;
-            $visits = [];
         }
 
         return [
