@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AgriculturalMachine;
 use App\Models\Garbage;
 use App\Models\Owner;
 use App\Models\Property;
 use App\Models\PropertyAgriculturalMachine;
+use App\Models\PropertyType;
 use App\Models\PropertyVehicle;
 use App\Models\Request as ModelsRequest;
 use App\Models\UserVisit;
+use App\Models\Vehicle;
 use App\Models\Visit;
 use Illuminate\Http\Request;
 
@@ -187,15 +190,21 @@ class OwnerController extends Controller
     }
 
     /**
-     * Return all owners names
+     * Return all owners names and other statments
      * 
      * @return Owner $owners
      */
     public function names() {
         $owners = Owner::query()->get(["_id", "firstname", "lastname"]);
+        $property_types = PropertyType::query()->get(["_id", "name"]);
+        $agricultural_machines = AgriculturalMachine::query()->get(["_id", "name"]);
+        $vehicles = Vehicle::query()->get(["_id", "name", "brand"]);
 
         return response()->json([
             'owners' => $owners,
+            'property_types' => $property_types,
+            'agricultural_machines' => $agricultural_machines,
+            'vehicles' => $vehicles,
         ], 200);
     }
 }
