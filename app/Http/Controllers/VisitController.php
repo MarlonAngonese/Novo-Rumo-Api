@@ -87,17 +87,17 @@ class VisitController extends Controller
 
         $visits = $visits->offset(($page - 1) * $elementsPerPage)->limit($elementsPerPage)->get();
 
-        $users = [];
         foreach ($visits as $visit_key => $visit) {
             //Set Users
             $user_visits = UserVisit::query()->where('fk_visit_id', '=', $visit->_id)->get(["_id", "fk_visit_id", "fk_user_id"]);
 
-            foreach($user_visits as $key => $user_visit) {
-                $users[$key] = User::query()->where('_id', '=', $user_visit->fk_user_id)->get(["_id", "name"])->first();
+            $users_ids = [];
+            foreach ($user_visits as $user_visit) {
+                array_push($users_ids, $user_visit->fk_user_id);
             }
 
-            $visits[$visit_key]->users = $users;
-            $users = [];
+            $usersResult = User::query()->whereIn('_id', $users_ids)->get(["_id", "name"]);
+            $visits[$visit_key]->users = $usersResult;
 
             //Set property
             $visit->property = Property::where("_id", "=", $visit->fk_property_id)->get(["_id", "code"])->first();
