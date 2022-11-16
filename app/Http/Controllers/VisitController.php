@@ -87,17 +87,34 @@ class VisitController extends Controller
 
         $visits = $visits->offset(($page - 1) * $elementsPerPage)->limit($elementsPerPage)->get();
 
+        $visits_ids = [];
+        foreach ($visits as $visit) {
+            array_push($visits_ids, $visit->_id);
+        }
+        
+        $all_user_visits = UserVisit::query()->whereIn('fk_visit_id', $visits_ids)->get(["_id", "fk_visit_id", "fk_user_id"]);
+
+        $users_ids = [];
+        foreach ($all_user_visits as $user_visit) {
+            array_push($users_ids, $user_visit->fk_user_id);
+        }
+
+        $all_users = User::query()->whereIn('_id', $users_ids)->get(["_id", "name"]);
+
         foreach ($visits as $visit_key => $visit) {
-            //Set Users
-            $user_visits = UserVisit::query()->where('fk_visit_id', '=', $visit->_id)->get(["_id", "fk_visit_id", "fk_user_id"]);
+            $users_list = [];
+            foreach ($all_user_visits as $user_visit) {
+                if ($user_visit->fk_visit_id == $visit->_id) {
 
-            $users_ids = [];
-            foreach ($user_visits as $user_visit) {
-                array_push($users_ids, $user_visit->fk_user_id);
+                    foreach($all_users as $user) {
+                        if ($user_visit->fk_user_id == $user->_id) {
+                            array_push($users_list, $user);
+                        }
+                    }
+        
+                    $visits[$visit_key]->users = $users_list;
+                }
             }
-
-            $usersResult = User::query()->whereIn('_id', $users_ids)->get(["_id", "name"]);
-            $visits[$visit_key]->users = $usersResult;
 
             //Set property
             $visit->property = Property::where("_id", "=", $visit->fk_property_id)->get(["_id", "code"])->first();
