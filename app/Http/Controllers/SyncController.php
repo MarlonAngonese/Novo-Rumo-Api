@@ -537,6 +537,7 @@ class SyncController extends Controller {
                 
                 $json = json_decode($request->getContent(), true);
                 $property_vehicles = $json['property_vehicles'];
+                $deleted = $json["deleted"];
 
                 foreach ($property_vehicles as $property_vehicle) {
                     $existingProperty_vehicle = PropertyVehicle::find($property_vehicle["_id"]);
@@ -554,6 +555,13 @@ class SyncController extends Controller {
                     $property_vehicleData->updated_at = new Carbon($property_vehicle["updatedAt"]);
 
                     $property_vehicleData->save();
+                }
+
+                foreach ($deleted as $del) {
+                    $del = PropertyVehicle::find($del);
+                    if ($del) {
+                        $del->delete();
+                    }
                 }
 
                 return response()->json([
