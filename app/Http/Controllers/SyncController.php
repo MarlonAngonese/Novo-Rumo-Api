@@ -603,6 +603,7 @@ class SyncController extends Controller {
                 
                 $json = json_decode($request->getContent(), true);
                 $property_agricultural_machines = $json['property_agricultural_machines'];
+                $deleted = $json['deleted'];
 
                 foreach ($property_agricultural_machines as $property_agricultural_machine) {
                     $existingProperty_agricultural_machine = PropertyAgriculturalMachine::find($property_agricultural_machine["_id"]);
@@ -620,6 +621,13 @@ class SyncController extends Controller {
                     $property_agricultural_machineData->updated_at = new Carbon($property_agricultural_machine["updatedAt"]);
 
                     $property_agricultural_machineData->save();
+                }
+
+                foreach ($deleted as $del) {
+                    $del = PropertyAgriculturalMachine::find($del);
+                    if ($del) {
+                        $del->delete();
+                    }
                 }
 
                 return response()->json([
