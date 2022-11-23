@@ -34,7 +34,7 @@ class PropertyController extends Controller
 
         $properties_list = [];
 
-        $hasSearch = $request->input('o') || $request->input('c');
+        $hasSearch = $request->input('o') || $request->input('c') || $request->input('tp');
 
         /** Search **/
         // Search By Owner
@@ -71,10 +71,32 @@ class PropertyController extends Controller
             }
         }
 
+        // Search By Code
+        if ($searchProperty = $request->input('c')) {
+            $propertiesByCode = Property::query()->where('code', 'regexp', "/.*$searchProperty/i")->get();
+
+            foreach ($propertiesByCode as $propertyByCode) {
+                if (!in_array($propertyByCode->_id, $properties_list, true)) {
+                    array_push($properties_list, $propertyByCode->_id);
+                }
+            }
+        }
+
+        // Search By Property Type
+        if ($searchPropertyType = $request->input('tp')) {
+            $propertiesByCode = Property::query()->where('fk_property_type_id', 'regexp', "/.*$searchPropertyType/i")->get();
+
+            foreach ($propertiesByCode as $propertyByCode) {
+                if (!in_array($propertyByCode->_id, $properties_list, true)) {
+                    array_push($properties_list, $propertyByCode->_id);
+                }
+            }
+        }
+
         if ($hasSearch) $properties->whereIn('_id', $properties_list);
         
         // Implements order by name
-        $properties->orderBy('updated_at', $request->input('sort', 'desc'));
+        $properties->orderBy('code', $request->input('sort', 'asc'));
 
         // Implements mongodb pagination
         $elementsPerPage = 25;
@@ -90,11 +112,15 @@ class PropertyController extends Controller
         }
 
         // Get owner list names
-        $all_owners = Owner::query()->get(["_id", "firstname", "lastname"]);
+        $all_owners = Owner::query()->orderBy('firstname', 'asc')->get(["_id", "firstname", "lastname"]);
+
+        // Get property type list names
+        $all_property_types = PropertyType::query()->orderBy('name', 'asc')->get(["_id", "name"]);
 
         return [
             'properties' => $properties,
             'all_owners' => $all_owners,
+            'all_property_types' => $all_property_types,
             'total' => $total,
             'page' => $page,
             'last_page' => ceil($total / $elementsPerPage)
@@ -109,6 +135,26 @@ class PropertyController extends Controller
      */
     public function store(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'fk_owner_id' => 'required',
+            'latitude' => 'required',
+            'longitude' => 'required',
+            'qty_people' => 'required',
+            'qty_agricultural_defensives' => 'required',
+        ], [
+            'fk_owner_id.required' => 'Por favor, preencha o proprietário!',
+            'latitude.required' => 'Por favor, preencha a latitude!',
+            'latitude.required' => 'Por favor, preencha a longitude!',
+            'qty_people.required' => 'Por favor, preencha o número de residentes!',
+            'qty_agricultural_defensives.required' => 'Por favor, preencha o número de defensivos agrícolas!',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->errors()->first(),
+            ], 400);
+        }
+
         try {
             $property = new Property($request->all());
             $property->save();
@@ -225,6 +271,26 @@ class PropertyController extends Controller
      */
     public function update($id, Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'fk_owner_id' => 'required',
+            'latitude' => 'required',
+            'longitude' => 'required',
+            'qty_people' => 'required',
+            'qty_agricultural_defensives' => 'required',
+        ], [
+            'fk_owner_id.required' => 'Por favor, preencha o proprietário!',
+            'latitude.required' => 'Por favor, preencha a latitude!',
+            'longitude.required' => 'Por favor, preencha a longitude!',
+            'qty_people.required' => 'Por favor, preencha o número de residentes!',
+            'qty_agricultural_defensives.required' => 'Por favor, preencha o número de defensivos agrícolas!',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->errors()->first(),
+            ], 400);
+        }
+
         $property = Property::find($id);
 
         // Save visits
