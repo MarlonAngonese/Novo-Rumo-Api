@@ -93,9 +93,6 @@ class PropertyController extends Controller
             }
         }
 
-        if ($hasSearch) $properties->whereIn('_id', $properties_list);
-        
-        // Implements order by name
         $field = $request->input('column', 'code');
         $sort = $request->input('sort', 'asc');
         $properties->orderBy($field, $sort);
@@ -111,6 +108,22 @@ class PropertyController extends Controller
             // List Owner
             $owner = Owner::query()->where('_id', '=', $property->fk_owner_id)->get(["_id", "firstname", "lastname"])->first();
             $properties[$property_key]->owner = $owner;
+        }
+
+        // Implements order by name
+        if ($request->input('column') == 'firstname') {
+            $properties = json_encode($properties);
+            $properties = json_decode($properties, true);
+
+            if ($request->input('sort') == 'desc' || $request->input('sort') == 'DESC') {
+                usort($properties, function ($a, $b) {
+                    return $a['owner']['firstname'] < $b['owner']['firstname'];
+                });
+            } else {
+                usort($properties, function ($a, $b) {
+                    return $a['owner']['firstname'] <=> $b['owner']['firstname'];
+                });
+            }
         }
 
         // Get owner list names
