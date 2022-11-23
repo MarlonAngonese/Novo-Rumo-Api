@@ -195,8 +195,8 @@ class OwnerController extends Controller
      * @return Owner $owners
      */
     public function names() {
-        $owners = Owner::query()->get(["_id", "firstname", "lastname"]);
-        $property_types = PropertyType::query()->get(["_id", "name"]);
+        $owners = Owner::query()->orderBy('firstname', 'asc')->get(["_id", "firstname", "lastname"]);
+        $property_types = PropertyType::query()->orderBy('name', 'asc')->get(["_id", "name"]);
         $agricultural_machines = AgriculturalMachine::query()->get(["_id", "name"]);
         $vehicles = Vehicle::query()->get(["_id", "name", "brand"]);
 
