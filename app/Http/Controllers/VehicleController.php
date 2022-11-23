@@ -25,7 +25,9 @@ class VehicleController extends Controller
         }
 
         // Implements order by name
-        $query->orderBy('brand', $request->input('sort', 'asc'));
+        $field = $request->input('column', 'name');
+        $sort = $request->input('sort', 'asc');
+        $query->orderBy($field, $sort);
 
         // Implements mongodb pagination
         $elementsPerPage = 25;

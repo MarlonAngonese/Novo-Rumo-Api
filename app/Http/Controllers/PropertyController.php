@@ -96,7 +96,9 @@ class PropertyController extends Controller
         if ($hasSearch) $properties->whereIn('_id', $properties_list);
         
         // Implements order by name
-        $properties->orderBy('code', $request->input('sort', 'asc'));
+        $field = $request->input('column', 'name');
+        $sort = $request->input('sort', 'asc');
+        $properties->orderBy($field, $sort);
 
         // Implements mongodb pagination
         $elementsPerPage = 25;

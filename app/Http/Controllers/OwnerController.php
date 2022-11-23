@@ -37,7 +37,9 @@ class OwnerController extends Controller
         }
 
         // Implements order by name
-        $query->orderBy('firstname', $request->input('sort', 'asc'));
+        $field = $request->input('column', 'firstname');
+        $sort = $request->input('sort', 'asc');
+        $query->orderBy($field, $sort);
 
         // Implements mongodb pagination
         $elementsPerPage = 25;
