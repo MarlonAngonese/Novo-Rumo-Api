@@ -93,6 +93,10 @@ class PropertyController extends Controller
             }
         }
 
+        if ($hasSearch) {
+            $properties->whereIn("_id", $properties_list);
+        }
+
         $field = $request->input('column', 'code');
         $sort = $request->input('sort', 'asc');
         $properties->orderBy($field, $sort);
