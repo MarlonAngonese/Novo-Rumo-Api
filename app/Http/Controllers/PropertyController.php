@@ -34,50 +34,136 @@ class PropertyController extends Controller
 
         $properties_list = [];
 
-        $hasSearch = $request->input('o') || $request->input('c') || $request->input('tp');
+        $hasSearch = $request->input('filterby', false);
+        $value = $request->input('value', false);
 
-        /** Search **/
-        // Search By Owner
-        if ($searchOwner = $request->input('o')) {
-            $queryOwner = Owner::query();
-
-            $queryOwner->where('_id', '=', $searchOwner);
-
-            $owners = $queryOwner->get();
-
-            $owners_ids = [];
-
-            foreach ($owners as $owner) {
-                array_push($owners_ids, $owner->_id);
-            }
-
-            $owner_properties = Property::whereIn('fk_owner_id', $owners_ids)->get();
-
-            foreach ($owner_properties as $owner_property) {
-                if (!in_array($owner_property->_id, $properties_list, true)) {
-                    array_push($properties_list, $owner_property->_id);
-                }
-            }
+        if (!$value) {
+            $value = $request->input('value_dropdown', false);
+            $value = $value == 'yes';
         }
 
-        // Search By Code
-        if ($searchProperty = $request->input('c')) {
-            $propertiesByCode = Property::query()->where('code', 'regexp', "/.*$searchProperty/i")->get();
+        if ($hasSearch) {
+            if ($hasSearch == 'code') {
+                $propertiesByCode = Property::query()->where('code', 'regexp', "/.*$value/i")->get();
 
-            foreach ($propertiesByCode as $propertyByCode) {
-                if (!in_array($propertyByCode->_id, $properties_list, true)) {
-                    array_push($properties_list, $propertyByCode->_id);
+                foreach ($propertiesByCode as $propertyByCode) {
+                    if (!in_array($propertyByCode->_id, $properties_list, true)) {
+                        array_push($properties_list, $propertyByCode->_id);
+                    }
                 }
-            }
-        }
+            } else if ($hasSearch == 'has_geo_board') {
+                if ($value) {
+                    $propertiesByCode = Property::query()->where('has_geo_board', '=', 1)->orWhere('has_geo_board', '=', "true")->orWhere('has_geo_board', '=', true)->get();
+                } else {
+                    $propertiesByCode = Property::query()->where('has_geo_board', '=', 0)->orWhere('has_geo_board', '=', "false")->orWhere('has_geo_board', '=', false)->get();
+                }
 
-        // Search By Code
-        if ($searchProperty = $request->input('c')) {
-            $propertiesByCode = Property::query()->where('code', 'regexp', "/.*$searchProperty/i")->get();
+                foreach ($propertiesByCode as $propertyByCode) {
+                    if (!in_array($propertyByCode->_id, $properties_list, true)) {
+                        array_push($properties_list, $propertyByCode->_id);
+                    }
+                }
+            } else if ($hasSearch == 'has_cams') {
+                if ($value) {
+                    $propertiesByCode = Property::query()->where('has_cams', '=', 1)->orWhere('has_cams', '=', "true")->orWhere('has_cams', '=', true)->get();
+                } else {
+                    $propertiesByCode = Property::query()->where('has_cams', '=', 0)->orWhere('has_cams', '=', "false")->orWhere('has_cams', '=', false)->get();
+                }
 
-            foreach ($propertiesByCode as $propertyByCode) {
-                if (!in_array($propertyByCode->_id, $properties_list, true)) {
-                    array_push($properties_list, $propertyByCode->_id);
+                foreach ($propertiesByCode as $propertyByCode) {
+                    if (!in_array($propertyByCode->_id, $properties_list, true)) {
+                        array_push($properties_list, $propertyByCode->_id);
+                    }
+                }
+            } else if ($hasSearch == 'has_gun') {
+                if ($value) {
+                    $propertiesByCode = Property::query()->where('has_gun', '=', 1)->orWhere('has_gun', '=', "true")->orWhere('has_gun', '=', true)->get();
+                } else {
+                    $propertiesByCode = Property::query()->where('has_gun', '=', 0)->orWhere('has_gun', '=', "false")->orWhere('has_gun', '=', false)->get();
+                }
+
+                foreach ($propertiesByCode as $propertyByCode) {
+                    if (!in_array($propertyByCode->_id, $properties_list, true)) {
+                        array_push($properties_list, $propertyByCode->_id);
+                    }
+                }
+            } else if ($hasSearch == 'qty_agricultural_defensives') {
+                if ($value) {
+                    $propertiesByCode = Property::query()->where('qty_agricultural_defensives', '>', 0)->get();
+                } else {
+                    $propertiesByCode = Property::query()->where('qty_agricultural_defensives', '=', 0)->get();
+                }
+
+                foreach ($propertiesByCode as $propertyByCode) {
+                    if (!in_array($propertyByCode->_id, $properties_list, true)) {
+                        array_push($properties_list, $propertyByCode->_id);
+                    }
+                }
+            } else if ($hasSearch == 'owner') {
+                $queryOwner = Owner::query();
+
+                $valueExploded = explode(' ', $value);
+                $firstValue = $valueExploded[0];
+                array_shift($valueExploded);
+                $value = implode(" ", $valueExploded);
+
+                if ($value == "") {
+                    $queryOwner->where('firstname', 'regexp', "/.*$firstValue/i")->orWhere('lastname', 'regexp', "/.*$firstValue/i");
+                } else {
+                    $queryOwner->where('firstname', 'regexp', "/.*$firstValue/i")->orWhere('lastname', 'regexp', "/.*$firstValue/i")->orWhere('lastname', 'regexp', "/.*$value/i")->orWhere('firstname', 'regexp', "/.*$value/i");
+                }
+
+                $owners = $queryOwner->get();
+                $owners_ids = [];
+                foreach ($owners as $owner) {
+                    array_push($owners_ids, $owner->_id);
+                }
+                $owner_properties = Property::whereIn('fk_owner_id', $owners_ids)->get();
+                foreach ($owner_properties as $owner_property) {
+                    if (!in_array($owner_property->_id, $properties_list, true)) {
+                        array_push($properties_list, $owner_property->_id);
+                    }
+                }
+            } else if ($hasSearch == 'cpf') {
+                $queryOwner = Owner::query();
+                $queryOwner->where('cpf', 'regexp', "/.*$value/i");
+
+                $owners = $queryOwner->get();
+                $owners_ids = [];
+                foreach ($owners as $owner) {
+                    array_push($owners_ids, $owner->_id);
+                }
+                $owner_properties = Property::whereIn('fk_owner_id', $owners_ids)->get();
+                foreach ($owner_properties as $owner_property) {
+                    if (!in_array($owner_property->_id, $properties_list, true)) {
+                        array_push($properties_list, $owner_property->_id);
+                    }
+                }
+            } else if ($hasSearch == 'property_type_id') {
+                $propertyTypes = PropertyType::query();
+                $propertyTypes = $propertyTypes->where('name', 'regexp', "/.*$value/i")->get();
+
+                foreach ($propertyTypes as $propertyType) {
+                    $propertiesByCode = Property::query()->where('fk_property_type_id', '=', $propertyType->_id)->get();
+    
+                    foreach ($propertiesByCode as $propertyByCode) {
+                        if (!in_array($propertyByCode->_id, $properties_list, true)) {
+                            array_push($properties_list, $propertyByCode->_id);
+                        }
+                    }
+                }
+            } else if ($hasSearch == 'car_identification') {
+                $propertyVehicles = PropertyVehicle::query();
+                $propertyVehicles = $propertyVehicles->where('identification', '=', $value)->get();
+
+                foreach ($propertyVehicles as $propertyVehicle) {
+                    $propertiesByCode = Property::query()->where('_id', '=', $propertyVehicle->fk_property_id)->get();
+    
+                    foreach ($propertiesByCode as $propertyByCode) {
+                        if (!in_array($propertyByCode->_id, $properties_list, true)) {
+                            array_push($properties_list, $propertyByCode->_id);
+                        }
+                    }
                 }
             }
         }
@@ -130,16 +216,8 @@ class PropertyController extends Controller
             }
         }
 
-        // Get owner list names
-        $all_owners = Owner::query()->orderBy('firstname', 'asc')->get(["_id", "firstname", "lastname"]);
-
-        // Get property type list names
-        $all_property_types = PropertyType::query()->orderBy('name', 'asc')->get(["_id", "name"]);
-
         return [
             'properties' => $properties,
-            'all_owners' => $all_owners,
-            'all_property_types' => $all_property_types,
             'total' => $total,
             'page' => $page,
             'last_page' => ceil($total / $elementsPerPage)
@@ -235,6 +313,7 @@ class PropertyController extends Controller
         foreach($property_vehicles as $property_vehicle) {
             $vehicle = Vehicle::query()->where('_id', '=', $property_vehicle->fk_vehicle_id)->first();
             $vehicle->color = $property_vehicle->color;
+            $vehicle->identification = $property_vehicle->identification;
             array_push($vehicles, $vehicle);
         }
         $property->vehicles = $vehicles;
