@@ -207,6 +207,7 @@ class SyncController extends Controller {
                     $propertyData->fk_property_type_id = $property["fk_property_type_id"];
                     $propertyData->latitude = $property["latitude"];
                     $propertyData->longitude = $property["longitude"];
+                    $propertyData->area = $property["area"];
                     $propertyData->created_at = new Carbon($property["createdAt"]);
                     $propertyData->updated_at = new Carbon($property["updatedAt"]);
 
