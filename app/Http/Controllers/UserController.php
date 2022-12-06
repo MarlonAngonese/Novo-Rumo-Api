@@ -7,6 +7,7 @@ use App\Models\Property;
 use App\Models\User;
 use App\Models\UserVisit;
 use App\Models\Visit;
+use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -102,7 +103,7 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($id, Request $request)
     {
         $user = User::find($id);
 
@@ -110,25 +111,43 @@ class UserController extends Controller
 
         $visits = [];
         foreach ($user_visits as $user_visit) {
-            //get garrison
-            $visit = Visit::query()->where('_id', '=', $user_visit->fk_visit_id)->first();
-            $garrison = UserVisit::query()->where('fk_visit_id', '=', $visit->_id)->get();
 
-            $users = [];
-            foreach ($garrison as $user_garrison) {
-                $userInstance = User::query()->where('_id', '=', $user_garrison->fk_user_id )->get(['name'])->first();
-                array_push($users, $userInstance->name);
+            if ($request->input('from') && !$request->input('to')) {
+                //get garrison
+                $visit = Visit::query()->where('_id', '=', $user_visit->fk_visit_id)->where('date', '>=', new DateTime($request->input('from')))->first();
+
+            } else if (!$request->input('from') && $request->input('to')) {
+                //get garrison
+                $visit = Visit::query()->where('_id', '=', $user_visit->fk_visit_id)->where('date', "<=", new DateTime($request->input('to')))->first();
+            } else if ($request->input('from') && $request->input('to')) {
+                //get garrison
+                $visit = Visit::query()->where('_id', '=', $user_visit->fk_visit_id)->where('date', ">=", new DateTime($request->input('from')))->where('date', "<=", new DateTime($request->input('to')))->first();
+            } else {
+                //get garrison
+                $visit = Visit::query()->where('_id', '=', $user_visit->fk_visit_id)->first();
             }
 
-            //get property
-            $property = Property::query()->where('_id', '=', $visit->fk_property_id)->get(['code', 'latitude', 'longitude'])->first();
+            if ($visit) {
+                $garrison = UserVisit::query()->where('fk_visit_id', '=', $visit->_id)->get();
 
-            $visit = [
-                'garrison' => $users,
-                'property' => $property
-            ];
+                $users = [];
+                foreach ($garrison as $user_garrison) {
+                    $userInstance = User::query()->where('_id', '=', $user_garrison->fk_user_id )->get(['name'])->first();
+                    array_push($users, $userInstance->name);
+                }
 
-            array_push($visits, $visit);
+                //get property
+                $property = Property::query()->where('_id', '=', $visit->fk_property_id)->get(['code', 'latitude', 'longitude'])->first();
+
+                $visit = [
+                    'garrison' => $users,
+                    'property' => $property
+                ];
+
+                array_push($visits, $visit);
+            }
+            
+            
         }
 
         $user->visits = $visits;
