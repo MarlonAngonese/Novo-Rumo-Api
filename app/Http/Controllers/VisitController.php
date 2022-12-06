@@ -2,12 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AgriculturalMachine;
 use App\Models\Garbage;
+use App\Models\Owner;
 use App\Models\Property;
+use App\Models\PropertyAgriculturalMachine;
+use App\Models\PropertyType;
+use App\Models\PropertyVehicle;
 use App\Models\PropertyVisit;
+use App\Models\Request as ModelsRequest;
 use App\Models\User;
 use App\Models\UserVisit;
+use App\Models\Vehicle;
 use App\Models\Visit;
+use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -26,7 +34,7 @@ class VisitController extends Controller
 
         $visits_list = [];
 
-        $hasSearch = $request->input('u') || $request->input('p');
+        $hasSearch = $request->input('u') || $request->input('p') || $request->input('from') || $request->input('to');
 
         /** Search **/
         // Search By User
@@ -75,10 +83,48 @@ class VisitController extends Controller
             }
         }
 
+        // Search between date
+        if ($request->input('from') && !$request->input('to')) {
+            $dt = new DateTime($request->input('from'));
+            $dt->modify('+ 3 hours');
+
+            $dateVisits = Visit::query()->where('date', '>=', $dt)->get();
+
+            foreach ($dateVisits as $dateVisit) {
+                if (!in_array($dateVisit->_id, $visits_list, true)) {
+                    array_push($visits_list, $dateVisit->_id);
+                }
+            }
+        } else if (!$request->input('from') && $request->input('to')) {
+            $dt = new DateTime($request->input('to'));
+            $dt->modify('+ 3 hours');
+
+            $dateVisits = Visit::query()->where('date', '<=', $dt)->get();
+
+            foreach ($dateVisits as $dateVisit) {
+                if (!in_array($dateVisit->_id, $visits_list, true)) {
+                    array_push($visits_list, $dateVisit->_id);
+                }
+            }
+        } else if ($request->input('from') && $request->input('to')) {
+            $dt = new DateTime($request->input('from'));
+            $dt->modify('+ 3 hours');
+            $dt2 = new DateTime($request->input('to'));
+            $dt2->modify('+ 3 hours');
+
+            $dateVisits = Visit::query()->where('date', '>=', $dt)->where('date', '<=', $dt2)->get();
+
+            foreach ($dateVisits as $dateVisit) {
+                if (!in_array($dateVisit->_id, $visits_list, true)) {
+                    array_push($visits_list, $dateVisit->_id);
+                }
+            }
+        }
+
         if ($hasSearch) $visits->whereIn('_id', $visits_list);
         
         // Implements order by name
-        $visits->orderBy('date', $request->input('sort', 'asc'));
+        $visits->orderBy('date', $request->input('sort', 'desc'));
 
         // Implements mongodb pagination
         $elementsPerPage = 25;
@@ -209,6 +255,38 @@ class VisitController extends Controller
 
         //Set property
         $visit->property = Property::where("_id", "=", $visit->fk_property_id)->first();
+
+        // List Owner
+        $owner = Owner::query()->where('_id', '=', $visit->property->fk_owner_id)->first();
+        $visit->property->owner = $owner;
+
+        // List Property Type
+        $property_type = PropertyType::query()->where('_id', '=', $visit->property->fk_property_type_id)->first();
+        $visit->property->property_type = $property_type;
+
+        // List Property Vehicles
+        $vehicles = [];
+        $property_vehicles = PropertyVehicle::query()->where('fk_property_id', '=', $visit->property->_id)->get();
+        foreach($property_vehicles as $property_vehicle) {
+            $vehicle = Vehicle::query()->where('_id', '=', $property_vehicle->fk_vehicle_id)->first();
+            $vehicle->color = $property_vehicle->color;
+            $vehicle->identification = $property_vehicle->identification;
+            array_push($vehicles, $vehicle);
+        }
+        $visit->property->vehicles = $vehicles;
+
+        // List Agricultural Machines
+        $agricultural_machines = [];
+        $property_agricultural_machines = PropertyAgriculturalMachine::query()->where('fk_property_id', '=', $visit->property->_id)->get();
+        foreach($property_agricultural_machines as $property_agricultural_machine) {
+            $agricultural_machine = AgriculturalMachine::query()->where('_id', '=', $property_agricultural_machine->fk_agricultural_machine_id)->first();
+            array_push($agricultural_machines, $agricultural_machine);
+        }
+        $visit->property->agricultural_machines = $agricultural_machines;
+
+        // List Requests
+        $model_requests = ModelsRequest::query()->where('fk_property_id', '=', $visit->property->_id)->get();
+        $visit->property->requests = $model_requests;
 
         return response()->json([
             'visit' => $visit,

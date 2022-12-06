@@ -113,15 +113,23 @@ class UserController extends Controller
         foreach ($user_visits as $user_visit) {
 
             if ($request->input('from') && !$request->input('to')) {
+                $dt = new DateTime($request->input('from'));
+                $dt->modify('+ 3 hours');
                 //get garrison
-                $visit = Visit::query()->where('_id', '=', $user_visit->fk_visit_id)->where('date', '>=', new DateTime($request->input('from')))->first();
+                $visit = Visit::query()->where('_id', '=', $user_visit->fk_visit_id)->where('date', '>=', $dt)->first();
 
             } else if (!$request->input('from') && $request->input('to')) {
+                $dt = new DateTime($request->input('to'));
+                $dt->modify('+ 3 hours');
                 //get garrison
-                $visit = Visit::query()->where('_id', '=', $user_visit->fk_visit_id)->where('date', "<=", new DateTime($request->input('to')))->first();
+                $visit = Visit::query()->where('_id', '=', $user_visit->fk_visit_id)->where('date', "<=", $dt)->first();
             } else if ($request->input('from') && $request->input('to')) {
+                $dt = new DateTime($request->input('from'));
+                $dt->modify('+ 3 hours');
+                $dt2 = new DateTime($request->input('to'));
+                $dt2->modify('+ 3 hours');
                 //get garrison
-                $visit = Visit::query()->where('_id', '=', $user_visit->fk_visit_id)->where('date', ">=", new DateTime($request->input('from')))->where('date', "<=", new DateTime($request->input('to')))->first();
+                $visit = Visit::query()->where('_id', '=', $user_visit->fk_visit_id)->where('date', ">=", $dt)->where('date', "<=", $dt2)->first();
             } else {
                 //get garrison
                 $visit = Visit::query()->where('_id', '=', $user_visit->fk_visit_id)->first();
