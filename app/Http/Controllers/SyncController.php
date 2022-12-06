@@ -379,6 +379,7 @@ class SyncController extends Controller {
                     $visitData->car = $visit["car"];
                     $visitData->date = new Carbon($visit["date"]);
                     $visitData->fk_property_id = $visit["fk_property_id"];
+                    $visitData->history = $visit["history"];
                     $visitData->created_at = new Carbon($visit["createdAt"]);
                     $visitData->updated_at = new Carbon($visit["updatedAt"]);
 
