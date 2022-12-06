@@ -553,6 +553,7 @@ class SyncController extends Controller {
                     $property_vehicleData->fk_vehicle_id = $property_vehicle["fk_vehicle_id"];
                     $property_vehicleData->fk_property_id = $property_vehicle["fk_property_id"];
                     $property_vehicleData->color = $property_vehicle["color"];
+                    $property_vehicleData->identification = $property_vehicle["identification"];
                     $property_vehicleData->created_at = new Carbon($property_vehicle["createdAt"]);
                     $property_vehicleData->updated_at = new Carbon($property_vehicle["updatedAt"]);
 
