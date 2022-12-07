@@ -397,15 +397,15 @@ class PropertyController extends Controller
 
         $property_vehicles = PropertyVehicle::query()->where('fk_property_id', '=', $property->_id)->get();
 
-        foreach($property_vehicles as $property_vehicle) {
-            $deleted = new Garbage([
-                'table' => 'property_vehicles',
-                'deleted_id' => $property_vehicle->_id,
-            ]);
-            $deleted->save();
+        // foreach($property_vehicles as $property_vehicle) {
+        //     $deleted = new Garbage([
+        //         'table' => 'property_vehicles',
+        //         'deleted_id' => $property_vehicle->_id,
+        //     ]);
+        //     $deleted->save();
 
-            PropertyVehicle::find($property_vehicle->_id)->delete();
-        }
+        //     PropertyVehicle::find($property_vehicle->_id)->delete();
+        // }
 
         $property_agricultural_machines = PropertyAgriculturalMachine::query()->where('fk_property_id', '=', $property->_id)->get();
 
@@ -419,17 +419,17 @@ class PropertyController extends Controller
             PropertyAgriculturalMachine::find($property_agricultural_machine->_id)->delete();
         }
 
-        if ($vehicles = $request->input('vehicles')) {
-            foreach ($vehicles as $vehicle) {
-                $property_vehicle = new PropertyVehicle([
-                    'fk_property_id' => $property->_id,
-                    'fk_vehicle_id' => $vehicle["id"],
-                    'color' => $vehicle["color"],
-                ]);
+        // if ($vehicles = $request->input('vehicles')) {
+        //     foreach ($vehicles as $vehicle) {
+        //         $property_vehicle = new PropertyVehicle([
+        //             'fk_property_id' => $property->_id,
+        //             'fk_vehicle_id' => $vehicle["id"],
+        //             'color' => $vehicle["color"],
+        //         ]);
 
-                $property_vehicle->save();
-            }
-        }
+        //         $property_vehicle->save();
+        //     }
+        // }
 
         if ($agricultural_machines = $request->input('agricultural_machines')) {
             foreach ($agricultural_machines as $agricultural_machine_id) {
