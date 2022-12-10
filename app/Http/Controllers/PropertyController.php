@@ -369,6 +369,9 @@ class PropertyController extends Controller
      */
     public function update($id, Request $request)
     {
+
+        // return ["breakpoint"];
+
         $validator = Validator::make($request->all(), [
             'fk_owner_id' => 'required',
             'latitude' => 'required',
@@ -397,16 +400,6 @@ class PropertyController extends Controller
 
         $property_vehicles = PropertyVehicle::query()->where('fk_property_id', '=', $property->_id)->get();
 
-        // foreach($property_vehicles as $property_vehicle) {
-        //     $deleted = new Garbage([
-        //         'table' => 'property_vehicles',
-        //         'deleted_id' => $property_vehicle->_id,
-        //     ]);
-        //     $deleted->save();
-
-        //     PropertyVehicle::find($property_vehicle->_id)->delete();
-        // }
-
         $property_agricultural_machines = PropertyAgriculturalMachine::query()->where('fk_property_id', '=', $property->_id)->get();
 
         foreach($property_agricultural_machines as $property_agricultural_machine) {
@@ -419,17 +412,49 @@ class PropertyController extends Controller
             PropertyAgriculturalMachine::find($property_agricultural_machine->_id)->delete();
         }
 
-        // if ($vehicles = $request->input('vehicles')) {
-        //     foreach ($vehicles as $vehicle) {
-        //         $property_vehicle = new PropertyVehicle([
-        //             'fk_property_id' => $property->_id,
-        //             'fk_vehicle_id' => $vehicle["id"],
-        //             'color' => $vehicle["color"],
-        //         ]);
+        
+        if ($vehicles = $request->input('vehicles')) {
+            // return $vehicles;    
+            $property_vehicles = PropertyVehicle::query()->where('fk_property_id', '=', $id)->get();
 
-        //         $property_vehicle->save();
-        //     }
-        // }
+            // List property vehicles, change if necessary. If count of current vehicles passes, delete it
+            foreach ($property_vehicles as $property_vehicle) {
+                if (!empty($vehicles)) {
+                    $current_vehicle = array_shift($vehicles);
+
+                    $property_vehicle->fk_vehicle_id = $current_vehicle["id"];
+                    $property_vehicle->color = $current_vehicle["color"];
+                    $property_vehicle->identification = $current_vehicle["identification"];
+
+                    $property_vehicle->save();
+
+                    // return [$property_vehicle, $current_vehicle, $vehicles];
+                } else {
+                    $property_vehicle->delete();
+                }
+            }
+
+            // Verify if request has more vehicles than the current database
+            if (!empty($vehicles)) {
+                foreach ($vehicles as $vehicle) {
+                    $property_vehicle = new PropertyVehicle([
+                        "fk_vehicle_id" => $vehicle["id"],
+                        "color" => $vehicle["color"],
+                        "identification" => $vehicle["identification"],
+                        "fk_property_id" => $id,
+                    ]);
+
+                    $property_vehicle->save();
+                }
+            }
+        } else {
+            $property_vehicles = PropertyVehicle::query()->where('fk_property_id', '=', $id)->get();
+
+            // List property vehicles, change if necessary. If count of current vehicles passes, delete it
+            foreach ($property_vehicles as $property_vehicle) {
+                $property_vehicle->delete();
+            }
+        }
 
         if ($agricultural_machines = $request->input('agricultural_machines')) {
             foreach ($agricultural_machines as $agricultural_machine_id) {

@@ -11,5 +11,5 @@ class PropertyVehicle extends Model
     protected $dates = ['created_at', 'updated_at'];
     public $timestamps = true;
 
-    public $fillable = ['color', 'fk_vehicle_id', 'fk_property_id'];
+    public $fillable = ['color', 'fk_vehicle_id', 'fk_property_id', 'identification'];
 }
